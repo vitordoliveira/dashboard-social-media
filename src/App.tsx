@@ -24,9 +24,12 @@ const darkTheme = createTheme({
 });
 
 // Dados de exemplo para o gráfico
+// ... imports permanecem os mesmos ...
+
 const lineChartData = [
   {
     id: 'Facebook',
+    color: '#1877F2', // Cor oficial do Facebook
     data: [
       { x: 'Jan', y: 10000 },
       { x: 'Feb', y: 10500 },
@@ -37,6 +40,7 @@ const lineChartData = [
   },
   {
     id: 'Twitter',
+    color: '#1DA1F2', // Cor oficial do Twitter
     data: [
       { x: 'Jan', y: 7000 },
       { x: 'Feb', y: 7300 },
@@ -45,7 +49,20 @@ const lineChartData = [
       { x: 'May', y: 8239 },
     ],
   },
+  {
+    id: 'Instagram',
+    color: '#E4405F', // Cor oficial do Instagram
+    data: [
+      { x: 'Jan', y: 20000 },
+      { x: 'Feb', y: 21000 },
+      { x: 'Mar', y: 21800 },
+      { x: 'Apr', y: 22500 },
+      { x: 'May', y: 23092 },
+    ],
+  },
 ];
+
+// ... resto do código permanece o mesmo ...
 
 function App() {
   return (

@@ -1,10 +1,12 @@
 import { NetworkData, Post, InsightData, LineChartSeries, EngagementData } from '../../types/dashboard';
+import { AnalyticsData, PerformanceMetrics, AudienceMetrics, ContentPerformance, TimingAnalysis } from '../../types/analytics';
 import { subDays, format, eachDayOfInterval, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 // Helper para gerar números aleatórios dentro de um intervalo
 const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
+// Todas as funções existentes permanecem iguais
 export const generateNetworkData = (startDate: Date, endDate: Date): NetworkData => {
   const daysRange = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
   const multiplier = daysRange / 30;
@@ -182,4 +184,138 @@ export const generateTopPosts = (startDate: Date, endDate: Date): Post[] => {
       timestamp: '2d atrás'
     }
   ];
+};
+
+// Novas funções para Analytics
+export const generateAnalyticsData = (startDate: Date, endDate: Date): AnalyticsData => {
+  const generatePerformanceMetrics = (): PerformanceMetrics => ({
+    impressions: randomInRange(50000, 100000),
+    reach: randomInRange(25000, 50000),
+    engagement: randomInRange(10000, 25000),
+    clicks: randomInRange(5000, 10000),
+    shares: randomInRange(1000, 5000),
+    saves: randomInRange(500, 2000),
+    previousPeriod: {
+      impressions: randomInRange(45000, 95000),
+      reach: randomInRange(20000, 45000),
+      engagement: randomInRange(8000, 20000),
+      clicks: randomInRange(4000, 9000),
+      shares: randomInRange(800, 4000),
+      saves: randomInRange(400, 1800),
+    }
+  });
+
+  const generateAudienceMetrics = (): AudienceMetrics => ({
+    totalFollowers: randomInRange(50000, 1000000),
+    followersGrowth: randomInRange(1000, 10000),
+    activeFollowers: randomInRange(25000, 500000),
+    demographics: {
+      age: {
+        '13-17': randomInRange(5, 10),
+        '18-24': randomInRange(15, 25),
+        '25-34': randomInRange(25, 35),
+        '35-44': randomInRange(15, 25),
+        '45-54': randomInRange(5, 15),
+        '55+': randomInRange(2, 8),
+      },
+      gender: {
+        male: randomInRange(45, 55),
+        female: randomInRange(40, 50),
+        other: randomInRange(2, 5),
+      },
+      topLocations: [
+        {
+          country: 'Brasil',
+          city: 'São Paulo',
+          count: randomInRange(10000, 50000),
+          percentage: randomInRange(15, 25),
+        },
+        {
+          country: 'Brasil',
+          city: 'Rio de Janeiro',
+          count: randomInRange(8000, 30000),
+          percentage: randomInRange(10, 20),
+        },
+        {
+          country: 'Brasil',
+          city: 'Belo Horizonte',
+          count: randomInRange(5000, 20000),
+          percentage: randomInRange(5, 15),
+        },
+      ],
+    },
+  });
+
+  const generateContentPerformance = (): ContentPerformance[] => [
+    {
+      type: 'image',
+      count: randomInRange(50, 100),
+      engagement: randomInRange(25000, 50000),
+      reach: randomInRange(50000, 100000),
+      avgEngagementRate: randomInRange(2, 5),
+    },
+    {
+      type: 'video',
+      count: randomInRange(20, 50),
+      engagement: randomInRange(35000, 75000),
+      reach: randomInRange(70000, 150000),
+      avgEngagementRate: randomInRange(3, 8),
+    },
+    {
+      type: 'carousel',
+      count: randomInRange(15, 30),
+      engagement: randomInRange(30000, 60000),
+      reach: randomInRange(60000, 120000),
+      avgEngagementRate: randomInRange(2, 6),
+    },
+  ];
+
+  const generateTimingAnalysis = (): TimingAnalysis => ({
+    bestDays: [
+      { day: 'Segunda', engagement: randomInRange(500, 1000), reach: randomInRange(2000, 5000) },
+      { day: 'Quarta', engagement: randomInRange(500, 1000), reach: randomInRange(2000, 5000) },
+      { day: 'Sexta', engagement: randomInRange(500, 1000), reach: randomInRange(2000, 5000) },
+    ],
+    bestHours: Array.from({ length: 24 }, (_, hour) => ({
+      hour,
+      engagement: randomInRange(200, 1000),
+      reach: randomInRange(1000, 5000),
+    })),
+  });
+
+  const generateNetworkAnalytics = () => ({
+    performance: generatePerformanceMetrics(),
+    audience: generateAudienceMetrics(),
+    content: generateContentPerformance(),
+    timing: generateTimingAnalysis(),
+  });
+
+  const networkAnalytics = {
+    facebook: generateNetworkAnalytics(),
+    instagram: generateNetworkAnalytics(),
+    twitter: generateNetworkAnalytics(),
+    linkedin: generateNetworkAnalytics(),
+  };
+
+  const totalFollowers = Object.values(networkAnalytics)
+    .reduce((sum, network) => sum + network.audience.totalFollowers, 0);
+
+  const totalEngagement = Object.values(networkAnalytics)
+    .reduce((sum, network) => sum + network.performance.engagement, 0);
+
+  return {
+    networkAnalytics,
+    globalStats: {
+      totalFollowers,
+      totalEngagement,
+      averageEngagementRate: (totalEngagement / totalFollowers) * 100,
+      topPerformingNetwork: 'instagram',
+      mostEngagingContentType: 'video',
+    },
+    dateRange: {
+      start: startDate,
+      end: endDate,
+    },
+    isLoading: false,
+  };
 };

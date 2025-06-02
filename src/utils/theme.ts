@@ -133,7 +133,7 @@ export const createCustomTheme = (options: CustomThemeOptions): Theme => {
       primary: {
         main: primaryColor,
         light: alpha(primaryColor, 0.8),
-        dark: alpha(primaryColor, 1.2),
+        dark: alpha(primaryColor, 0.9), // Alterado de 1.2 para 0.9
         contrastText: '#fff'
       },
       background: {

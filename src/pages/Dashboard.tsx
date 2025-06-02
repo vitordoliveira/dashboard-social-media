@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { Typography, Box, Skeleton, Paper, useTheme, alpha, Fade, Grow } from '@mui/material';
+import { Typography, Box, Skeleton, Paper, useTheme, alpha } from '@mui/material';
 import { Facebook, Twitter, Instagram, LinkedIn } from '@mui/icons-material';
+import { motion, AnimatePresence, domAnimation, LazyMotion } from 'framer-motion';
 import StatsCard from '../components/dashboard/StatsCard';
 import LineChart from '../components/charts/LineChart';
 import BarChart from '../components/charts/BarChart';
@@ -15,6 +16,9 @@ interface DashboardProps {
   dateRangeType: string;
   onDateRangeChange: (type: string, range?: DateRange) => void;
 }
+
+// Componente wrapper para animações
+const MotionBox = motion.create(Box);
 
 const Dashboard: React.FC<DashboardProps> = ({
   dateRange,
@@ -33,6 +37,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   const statsCards = useMemo(() => [
     {
+      id: 'facebook',
       title: "Facebook Followers",
       value: networkData.facebook?.followers.toLocaleString() ?? '0',
       change: networkData.facebook?.engagement ?? 0,
@@ -40,6 +45,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       color: '#1877F2'
     },
     {
+      id: 'twitter',
       title: "Twitter Followers",
       value: networkData.twitter?.followers.toLocaleString() ?? '0',
       change: networkData.twitter?.engagement ?? 0,
@@ -47,6 +53,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       color: '#1DA1F2'
     },
     {
+      id: 'instagram',
       title: "Instagram Followers",
       value: networkData.instagram?.followers.toLocaleString() ?? '0',
       change: networkData.instagram?.engagement ?? 0,
@@ -54,6 +61,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       color: '#E4405F'
     },
     {
+      id: 'linkedin',
       title: "LinkedIn Followers",
       value: networkData.linkedin?.followers.toLocaleString() ?? '0',
       change: networkData.linkedin?.engagement ?? 0,
@@ -62,26 +70,53 @@ const Dashboard: React.FC<DashboardProps> = ({
     }
   ], [networkData]);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    }
+  };
+
   return (
-    <Box sx={{ 
-      p: { xs: 2, sm: 3 },
-      maxWidth: '1600px',
-      margin: '0 auto',
-      width: '100%',
-      minHeight: '100vh',
-      background: alpha(theme.palette.background.default, 0.6)
-    }}>
-      {/* Header com filtro de data */}
-      <Fade in={true} timeout={1000}>
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 4,
-          mt: 2,
-          flexWrap: 'wrap',
-          gap: 2
-        }}>
+    <LazyMotion features={domAnimation}>
+      <Box sx={{ 
+        p: { xs: 2, sm: 3 },
+        maxWidth: '1600px',
+        margin: '0 auto',
+        width: '100%',
+        minHeight: '100vh',
+        background: alpha(theme.palette.background.default, 0.6)
+      }}>
+        {/* Header com filtro de data */}
+        <MotionBox
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 4,
+            mt: 2,
+            flexWrap: 'wrap',
+            gap: 2
+          }}
+        >
           <Typography 
             variant="h5" 
             component="h1"
@@ -97,27 +132,31 @@ const Dashboard: React.FC<DashboardProps> = ({
             value={dateRangeType} 
             onChange={onDateRangeChange}
           />
-        </Box>
-      </Fade>
+        </MotionBox>
 
-      {/* Cards de estatísticas */}
-      <Box sx={{
-        display: 'grid',
-        gridTemplateColumns: {
-          xs: '1fr',
-          sm: 'repeat(2, 1fr)',
-          lg: 'repeat(4, 1fr)',
-        },
-        gap: 3,
-        mb: 4,
-      }}>
-        {statsCards.map((card, index) => (
-          <Grow
-            key={card.title}
-            in={!isLoading}
-            timeout={(index + 1) * 200}
-          >
-            <Box>
+        {/* Cards de estatísticas */}
+        <MotionBox
+          key="stats-container"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              lg: 'repeat(4, 1fr)',
+            },
+            gap: 3,
+            mb: 4,
+          }}
+        >
+          {statsCards.map((card) => (
+            <MotionBox
+              key={card.id}
+              variants={itemVariants}
+              layoutId={card.id}
+            >
               {isLoading ? (
                 <Skeleton 
                   variant="rectangular"
@@ -136,69 +175,86 @@ const Dashboard: React.FC<DashboardProps> = ({
                   color={card.color}
                 />
               )}
-            </Box>
-          </Grow>
-        ))}
-      </Box>
+            </MotionBox>
+          ))}
+        </MotionBox>
 
-      {/* Cards de Insights */}
-      <Box sx={{
-        display: 'grid',
-        gridTemplateColumns: {
-          xs: '1fr',
-          md: 'repeat(3, 1fr)',
-        },
-        gap: 3,
-        mb: 4,
-      }}>
-        {isLoading ? (
-          Array(3).fill(0).map((_, index) => (
-            <Fade key={`skeleton-${index}`} in={true} timeout={(index + 1) * 200}>
-              <Skeleton 
-                variant="rectangular"
-                height={160}
-                sx={{ 
-                  borderRadius: 2,
-                  background: alpha(theme.palette.primary.main, 0.1)
-                }}
-              />
-            </Fade>
-          ))
-        ) : (
-          insights.map((insight, index) => (
-            <Grow
-              key={`insight-${index}`}
-              in={true}
-              timeout={(index + 1) * 200}
-            >
-              <Box>
+        {/* Cards de Insights */}
+        <MotionBox
+          key="insights-container"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              md: 'repeat(3, 1fr)',
+            },
+            gap: 3,
+            mb: 4,
+          }}
+        >
+          {isLoading ? (
+            Array(3).fill(0).map((_, index) => (
+              <MotionBox
+                key={`skeleton-insight-${index}`}
+                variants={itemVariants}
+                layoutId={`insight-skeleton-${index}`}
+              >
+                <Skeleton 
+                  variant="rectangular"
+                  height={160}
+                  sx={{ 
+                    borderRadius: 2,
+                    background: alpha(theme.palette.primary.main, 0.1)
+                  }}
+                />
+              </MotionBox>
+            ))
+          ) : (
+            insights.map((insight, index) => (
+              <MotionBox
+                key={`insight-${insight.title}`}
+                variants={itemVariants}
+                layoutId={`insight-${index}`}
+              >
                 <InsightCard {...insight} />
-              </Box>
-            </Grow>
-          ))
-        )}
-      </Box>
+              </MotionBox>
+            ))
+          )}
+        </MotionBox>
 
-      {/* Layout dos gráficos e posts */}
-      <Box sx={{
-        display: 'grid',
-        gridTemplateColumns: {
-          xs: '1fr',
-          lg: '2fr 1fr',
-        },
-        gap: 3,
-      }}>
-        {/* Coluna dos gráficos */}
-        <Fade in={!isLoading} timeout={800}>
-          <Box sx={{ display: 'grid', gap: 3 }}>
+        {/* Layout dos gráficos e posts */}
+        <MotionBox
+          key="charts-container"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              lg: '2fr 1fr',
+            },
+            gap: 3,
+          }}
+        >
+          {/* Coluna dos gráficos */}
+          <MotionBox 
+            key="charts-column"
+            variants={itemVariants}
+            sx={{ display: 'grid', gap: 3 }}
+          >
             {isLoading ? (
-              <>
+              <Box>
                 <Skeleton 
                   variant="rectangular" 
                   height={400} 
                   sx={{ 
                     borderRadius: 2,
-                    background: alpha(theme.palette.primary.main, 0.1)
+                    background: alpha(theme.palette.primary.main, 0.1),
+                    mb: 3
                   }} 
                 />
                 <Skeleton 
@@ -209,25 +265,28 @@ const Dashboard: React.FC<DashboardProps> = ({
                     background: alpha(theme.palette.primary.main, 0.1)
                   }} 
                 />
-              </>
+              </Box>
             ) : (
-              <>
+              <Box>
                 <LineChart 
                   data={lineChartData}
                   title="Crescimento de Seguidores"
                 />
-                <BarChart 
-                  data={engagementData}
-                  title="Engajamento por Rede Social"
-                />
-              </>
+                <Box sx={{ mt: 3 }}>
+                  <BarChart 
+                    data={engagementData}
+                    title="Engajamento por Rede Social"
+                  />
+                </Box>
+              </Box>
             )}
-          </Box>
-        </Fade>
+          </MotionBox>
 
-        {/* Coluna lateral */}
-        <Fade in={!isLoading} timeout={1000}>
-          <Box>
+          {/* Coluna lateral */}
+          <MotionBox 
+            key="posts-column"
+            variants={itemVariants}
+          >
             {isLoading ? (
               <Skeleton 
                 variant="rectangular" 
@@ -240,10 +299,10 @@ const Dashboard: React.FC<DashboardProps> = ({
             ) : (
               <TopPosts posts={topPosts} />
             )}
-          </Box>
-        </Fade>
+          </MotionBox>
+        </MotionBox>
       </Box>
-    </Box>
+    </LazyMotion>
   );
 };
 

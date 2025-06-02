@@ -13,7 +13,7 @@ import {
   generateEngagementData,
   generateInsights,
   generateTopPosts
-} from '../api/mockData';
+} from '../api/services/mockData';
 
 interface DashboardData {
   networkData: NetworkData;

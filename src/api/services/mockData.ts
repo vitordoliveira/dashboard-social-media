@@ -1,10 +1,13 @@
-import { NetworkData, Post, InsightData, LineChartSeries, EngagementData } from '../types/dashboard';
-import { subDays, format } from 'date-fns';
+import { NetworkData, Post, InsightData, LineChartSeries, EngagementData } from '../../types/dashboard';
+import { subDays, format, eachDayOfInterval, addDays } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
+// Helper para gerar números aleatórios dentro de um intervalo
+const randomInRange = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 export const generateNetworkData = (startDate: Date, endDate: Date): NetworkData => {
-  // Simulando dados que mudam com base no período selecionado
   const daysRange = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  const multiplier = daysRange / 30; // Usando 30 dias como base
+  const multiplier = daysRange / 30;
 
   return {
     facebook: {
@@ -43,15 +46,18 @@ export const generateNetworkData = (startDate: Date, endDate: Date): NetworkData
 };
 
 export const generateLineChartData = (startDate: Date, endDate: Date): LineChartSeries[] => {
-  const daysRange = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-  const dataPoints = Math.min(Math.max(5, Math.floor(daysRange / 7)), 12); // Entre 5 e 12 pontos
+  const dates = eachDayOfInterval({ start: startDate, end: endDate });
+  const dataPoints = Math.min(Math.max(7, Math.floor(dates.length / 7)), 14); // Entre 7 e 14 pontos
+  const interval = Math.floor(dates.length / dataPoints);
 
-  const generateDataPoints = (baseValue: number, growth: number) => {
+  const generateDataPoints = (baseValue: number, volatility: number) => {
     return Array.from({ length: dataPoints }, (_, i) => {
-      const date = subDays(endDate, Math.floor((daysRange / (dataPoints - 1)) * (dataPoints - 1 - i)));
+      const date = dates[Math.min(i * interval, dates.length - 1)];
+      const trend = (i / dataPoints) * volatility;
+      const noise = (Math.random() - 0.5) * volatility * 0.5;
       return {
-        x: format(date, 'MMM dd'),
-        y: Math.floor(baseValue * (1 + (growth * i) / 100))
+        x: format(date, 'dd/MM', { locale: ptBR }),
+        y: Math.floor(baseValue * (1 + trend + noise))
       };
     });
   };
@@ -60,17 +66,22 @@ export const generateLineChartData = (startDate: Date, endDate: Date): LineChart
     {
       id: 'Facebook',
       color: '#1877F2',
-      data: generateDataPoints(10000, 2.5)
+      data: generateDataPoints(12000, 0.25)
     },
     {
       id: 'Twitter',
       color: '#1DA1F2',
-      data: generateDataPoints(7000, 1.8)
+      data: generateDataPoints(8000, 0.15)
     },
     {
       id: 'Instagram',
       color: '#E4405F',
-      data: generateDataPoints(20000, 1.5)
+      data: generateDataPoints(23000, 0.35)
+    },
+    {
+      id: 'LinkedIn',
+      color: '#0A66C2',
+      data: generateDataPoints(4800, 0.20)
     }
   ];
 };
@@ -108,29 +119,36 @@ export const generateEngagementData = (startDate: Date, endDate: Date): Engageme
 };
 
 export const generateInsights = (networkData: NetworkData): InsightData[] => {
-  return [
-    {
-      title: 'Melhor Horário',
-      description: 'Posts entre 18h e 20h tem 47% mais engajamento',
-      trend: 'up',
-      percentage: 47,
-      tooltip: 'Baseado nos últimos 30 dias'
-    },
-    {
-      title: 'Conteúdo Popular',
-      description: 'Vídeos curtos têm 3x mais interações',
-      trend: 'up',
-      percentage: 300,
-      tooltip: 'Comparado a outros formatos'
-    },
-    {
-      title: 'Crescimento',
-      description: `${networkData.instagram.engagement > networkData.facebook.engagement ? 'Instagram' : 'Facebook'} lidera em novos seguidores`,
-      trend: 'up',
-      percentage: Math.max(networkData.instagram.engagement, networkData.facebook.engagement),
-      tooltip: 'Último período'
-    }
-  ];
+  const bestTimeInsight: InsightData = {
+    title: 'Melhor Horário',
+    description: 'Posts entre 18h e 20h têm 47% mais engajamento',
+    trend: 'up',
+    percentage: 47,
+    tooltip: 'Baseado na análise dos últimos 30 dias de posts'
+  };
+
+  const contentInsight: InsightData = {
+    title: 'Conteúdo Popular',
+    description: 'Vídeos curtos têm 3x mais interações que outros formatos',
+    trend: 'up',
+    percentage: 300,
+    tooltip: 'Comparado com a média de outros tipos de conteúdo'
+  };
+
+  const bestPlatform = 
+    networkData.instagram.engagement > networkData.facebook.engagement ? 
+    { name: 'Instagram', value: networkData.instagram.engagement } : 
+    { name: 'Facebook', value: networkData.facebook.engagement };
+
+  const growthInsight: InsightData = {
+    title: 'Crescimento',
+    description: `${bestPlatform.name} lidera em crescimento este mês`,
+    trend: 'up',
+    percentage: Math.round(bestPlatform.value * 10) / 10,
+    tooltip: 'Taxa de crescimento em relação ao mês anterior'
+  };
+
+  return [bestTimeInsight, contentInsight, growthInsight];
 };
 
 export const generateTopPosts = (startDate: Date, endDate: Date): Post[] => {
@@ -138,23 +156,30 @@ export const generateTopPosts = (startDate: Date, endDate: Date): Post[] => {
     {
       id: '1',
       network: 'instagram',
-      content: 'Lançamento da nova coleção 🚀',
-      engagement: 2547,
+      content: '🚀 Nova coleção Outono/Inverno chegando! #ModaConsciente #Sustentabilidade',
+      engagement: randomInRange(2000, 3000),
       timestamp: '2h atrás'
     },
     {
       id: '2',
       network: 'facebook',
-      content: 'Promoção especial de fim de semana!',
-      engagement: 1823,
+      content: '📢 Super promoção de fim de semana! Desconto de 30% em todas as peças.',
+      engagement: randomInRange(1500, 2500),
       timestamp: '5h atrás'
     },
     {
       id: '3',
       network: 'twitter',
-      content: 'Novidades chegando em breve...',
-      engagement: 945,
+      content: '🎉 Em breve: Colaboração especial com @designerfamoso! Fiquem ligados!',
+      engagement: randomInRange(800, 1200),
       timestamp: '1d atrás'
+    },
+    {
+      id: '4',
+      network: 'linkedin',
+      content: 'Orgulhosos em anunciar nossa nova iniciativa de sustentabilidade...',
+      engagement: randomInRange(500, 1000),
+      timestamp: '2d atrás'
     }
   ];
 };

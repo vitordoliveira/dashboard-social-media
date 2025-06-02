@@ -132,22 +132,26 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
     return isSameDay(customRange.end, end);
   };
 
+  const isNextDisabled = isDateRangeToday();
+
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Tooltip title="Período anterior">
-          <IconButton 
-            size="small" 
-            onClick={() => handleQuickNav('prev')}
-            sx={{ 
-              bgcolor: alpha(theme.palette.primary.main, 0.1),
-              '&:hover': {
-                bgcolor: alpha(theme.palette.primary.main, 0.2),
-              }
-            }}
-          >
-            <ChevronLeft />
-          </IconButton>
+          <span>
+            <IconButton 
+              size="small" 
+              onClick={() => handleQuickNav('prev')}
+              sx={{ 
+                bgcolor: alpha(theme.palette.primary.main, 0.1),
+                '&:hover': {
+                  bgcolor: alpha(theme.palette.primary.main, 0.2),
+                }
+              }}
+            >
+              <ChevronLeft />
+            </IconButton>
+          </span>
         </Tooltip>
 
         <Paper sx={{ 
@@ -195,42 +199,49 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
           <Divider orientation="vertical" flexItem />
 
           <Tooltip title="Selecionar período personalizado">
-            <IconButton 
-              size="small"
-              onClick={handleCustomClick}
-              sx={{ 
-                bgcolor: value === 'custom' 
-                  ? alpha(theme.palette.primary.main, 0.15)
-                  : 'transparent',
-                color: value === 'custom'
-                  ? theme.palette.primary.main
-                  : theme.palette.text.primary,
-                '&:hover': {
+            <span>
+              <IconButton 
+                size="small"
+                onClick={handleCustomClick}
+                sx={{ 
                   bgcolor: value === 'custom' 
-                    ? alpha(theme.palette.primary.main, 0.25)
-                    : alpha(theme.palette.action.hover, 0.1)
-                }
-              }}
-            >
-              <CalendarMonth />
-            </IconButton>
+                    ? alpha(theme.palette.primary.main, 0.15)
+                    : 'transparent',
+                  color: value === 'custom'
+                    ? theme.palette.primary.main
+                    : theme.palette.text.primary,
+                  '&:hover': {
+                    bgcolor: value === 'custom' 
+                      ? alpha(theme.palette.primary.main, 0.25)
+                      : alpha(theme.palette.action.hover, 0.1)
+                  }
+                }}
+              >
+                <CalendarMonth />
+              </IconButton>
+            </span>
           </Tooltip>
         </Paper>
 
         <Tooltip title="Próximo período">
-          <IconButton 
-            size="small" 
-            onClick={() => handleQuickNav('next')}
-            disabled={isDateRangeToday()}
-            sx={{ 
-              bgcolor: alpha(theme.palette.primary.main, 0.1),
-              '&:hover': {
-                bgcolor: alpha(theme.palette.primary.main, 0.2),
-              }
-            }}
-          >
-            <ChevronRight />
-          </IconButton>
+          <span>
+            <IconButton 
+              size="small" 
+              onClick={() => handleQuickNav('next')}
+              disabled={isNextDisabled}
+              sx={{ 
+                bgcolor: alpha(theme.palette.primary.main, 0.1),
+                '&:hover': {
+                  bgcolor: alpha(theme.palette.primary.main, 0.2),
+                },
+                '&.Mui-disabled': {
+                  bgcolor: alpha(theme.palette.action.disabled, 0.1),
+                }
+              }}
+            >
+              <ChevronRight />
+            </IconButton>
+          </span>
         </Tooltip>
 
         <Typography 

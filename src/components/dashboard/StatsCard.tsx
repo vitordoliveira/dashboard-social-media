@@ -1,6 +1,6 @@
 import React from 'react';
-import { Box, Card, Typography, alpha, useTheme, Tooltip } from '@mui/material';
-import { TrendingUp, TrendingDown } from '@mui/icons-material';
+import { Box, Card, Typography, alpha, useTheme, Tooltip, Skeleton } from '@mui/material';
+import { TrendingUp, TrendingDown, InfoOutlined } from '@mui/icons-material';
 import { formatNumber, formatPercentage } from '../../utils/formatters';
 import { getGradient } from '../../utils/theme';
 
@@ -10,6 +10,14 @@ interface StatsCardProps {
   change: number;
   icon: React.ReactNode;
   color?: string;
+  previousValue?: number;
+  isLoading?: boolean;
+  tooltip?: string;
+  period?: string;
+  additionalStats?: Array<{
+    label: string;
+    value: string | number;
+  }>;
 }
 
 const StatsCard: React.FC<StatsCardProps> = ({
@@ -17,12 +25,43 @@ const StatsCard: React.FC<StatsCardProps> = ({
   value,
   change,
   icon,
-  color = '#90caf9'
+  color = '#90caf9',
+  previousValue,
+  isLoading = false,
+  tooltip,
+  period = 'vs último período',
+  additionalStats
 }) => {
   const theme = useTheme();
   const formattedValue = typeof value === 'number' ? formatNumber(value) : value;
   const formattedChange = formatPercentage(change);
   const isPositive = change >= 0;
+
+  if (isLoading) {
+    return (
+      <Card
+        sx={{
+          p: 3,
+          background: getGradient(color),
+          border: 1,
+          borderColor: 'divider',
+          position: 'relative',
+          overflow: 'hidden',
+          height: '100%'
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Skeleton variant="rectangular" width={48} height={48} sx={{ borderRadius: 2 }} />
+          <Skeleton variant="rectangular" width={80} height={24} sx={{ borderRadius: 1 }} />
+        </Box>
+        <Skeleton variant="text" width="60%" height={40} sx={{ mb: 1 }} />
+        <Skeleton variant="text" width="40%" height={24} />
+        <Box sx={{ mt: 2, pt: 2, borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
+          <Skeleton variant="text" width="80%" height={20} />
+        </Box>
+      </Card>
+    );
+  }
 
   return (
     <Card
@@ -33,12 +72,12 @@ const StatsCard: React.FC<StatsCardProps> = ({
         borderColor: 'divider',
         position: 'relative',
         overflow: 'hidden',
-        transition: 'all 0.3s ease-in-out',
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
           transform: 'translateY(-4px)',
           boxShadow: theme.shadows[8],
           '& .icon-wrapper': {
-            transform: 'scale(1.1)',
+            transform: 'scale(1.1)'
           }
         },
         '&::before': {
@@ -79,38 +118,55 @@ const StatsCard: React.FC<StatsCardProps> = ({
               borderRadius: 2,
               bgcolor: alpha(color, 0.15),
               display: 'flex',
-              transition: 'transform 0.3s ease-in-out',
+              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               boxShadow: `0 4px 12px ${alpha(color, 0.15)}`
             }}
           >
             {icon}
           </Box>
-          <Tooltip title="Comparação com o período anterior" arrow placement="top">
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-                background: alpha(
-                  isPositive ? theme.palette.success.main : theme.palette.error.main,
-                  0.1
-                ),
-                color: isPositive ? theme.palette.success.main : theme.palette.error.main,
-                py: 0.5,
-                px: 1,
-                borderRadius: 1,
-                fontSize: '0.75rem',
-                fontWeight: 'medium'
-              }}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Tooltip 
+              title={`Variação: ${formattedChange} (${period})`}
+              arrow 
+              placement="top"
             >
-              {isPositive ? (
-                <TrendingUp fontSize="small" />
-              ) : (
-                <TrendingDown fontSize="small" />
-              )}
-              {formattedChange}
-            </Box>
-          </Tooltip>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  background: alpha(
+                    isPositive ? theme.palette.success.main : theme.palette.error.main,
+                    0.1
+                  ),
+                  color: isPositive ? theme.palette.success.main : theme.palette.error.main,
+                  py: 0.5,
+                  px: 1,
+                  borderRadius: 1,
+                  fontSize: '0.75rem',
+                  fontWeight: 'medium'
+                }}
+              >
+                {isPositive ? (
+                  <TrendingUp fontSize="small" />
+                ) : (
+                  <TrendingDown fontSize="small" />
+                )}
+                {formattedChange}
+              </Box>
+            </Tooltip>
+            {tooltip && (
+              <Tooltip title={tooltip} arrow placement="top">
+                <InfoOutlined 
+                  sx={{ 
+                    fontSize: 18, 
+                    color: alpha(theme.palette.text.secondary, 0.7),
+                    cursor: 'help'
+                  }} 
+                />
+              </Tooltip>
+            )}
+          </Box>
         </Box>
 
         <Typography 
@@ -120,7 +176,8 @@ const StatsCard: React.FC<StatsCardProps> = ({
             fontWeight: 'bold',
             background: `linear-gradient(45deg, ${theme.palette.text.primary} 30%, ${alpha(theme.palette.text.primary, 0.7)} 90%)`,
             WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
+            WebkitTextFillColor: 'transparent',
+            letterSpacing: '-0.5px'
           }}
         >
           {formattedValue}
@@ -137,26 +194,65 @@ const StatsCard: React.FC<StatsCardProps> = ({
           {title}
         </Typography>
 
-        <Box
-          sx={{
-            mt: 2,
-            pt: 2,
-            borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1
-          }}
-        >
-          <Typography
-            variant="caption"
+        {additionalStats && additionalStats.length > 0 && (
+          <Box
             sx={{
-              color: alpha(theme.palette.text.secondary, 0.7),
-              fontSize: '0.75rem'
+              mt: 2,
+              pt: 2,
+              borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+              gap: 2
             }}
           >
-            vs último período
-          </Typography>
-        </Box>
+            {additionalStats.map((stat, index) => (
+              <Box key={index}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: alpha(theme.palette.text.secondary, 0.7),
+                    display: 'block',
+                    mb: 0.5
+                  }}
+                >
+                  {stat.label}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 'medium',
+                    color: theme.palette.text.primary
+                  }}
+                >
+                  {typeof stat.value === 'number' ? formatNumber(stat.value) : stat.value}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        )}
+
+        {(!additionalStats || additionalStats.length === 0) && (
+          <Box
+            sx={{
+              mt: 2,
+              pt: 2,
+              borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
+            }}
+          >
+            <Typography
+              variant="caption"
+              sx={{
+                color: alpha(theme.palette.text.secondary, 0.7),
+                fontSize: '0.75rem'
+              }}
+            >
+              {period}
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Card>
   );

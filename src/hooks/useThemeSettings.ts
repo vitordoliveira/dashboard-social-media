@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { colorPalettes, themePresets, type ThemePreset } from '../utils/theme';
+import { colorPalettes, themePresets, type ThemePreset } from '../theme'; // Atualizado
 
 export interface ThemeSettings {
   mode: 'light' | 'dark';

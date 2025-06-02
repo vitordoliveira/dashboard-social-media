@@ -24,7 +24,7 @@ import {
   Close as CloseIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { getSidebarStyles } from './Sidebar.styles';
+import { getSidebarStyles } from './styles'; // Atualizado
 
 interface MenuItem {
   id: string;

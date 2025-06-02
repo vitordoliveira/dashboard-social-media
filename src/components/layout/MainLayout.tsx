@@ -4,7 +4,7 @@ import { useLocation, Link as RouterLink } from 'react-router-dom';
 import { useThemeContext } from '../../context/ThemeContext';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import { getMainLayoutStyles, DRAWER_WIDTH } from './MainLayout.styles';
+import { getMainLayoutStyles, DRAWER_WIDTH } from './styles'; // Atualizado
 
 interface MainLayoutProps {
   children: React.ReactNode;

@@ -21,7 +21,7 @@ import {
   Menu as MenuIcon,
   ChevronRight,
 } from '@mui/icons-material';
-import { getHeaderStyles } from './Header.styles';
+import { getHeaderStyles } from './styles'; // Atualizado
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 

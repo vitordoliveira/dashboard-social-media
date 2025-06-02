@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import ThemeSettings from '../components/layout/ThemeSettings';
+import ThemeSettings from '../components/settings/ThemeSettings';
 
 const Settings = () => {
   return (

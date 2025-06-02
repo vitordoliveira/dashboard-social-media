@@ -2,7 +2,7 @@ import React, { createContext, useContext } from 'react';
 import { useThemeSettings } from '../hooks/useThemeSettings';
 import type { ThemeSettings, ThemePreset } from '../hooks/useThemeSettings';
 import { Theme } from '@mui/material';
-import { createCustomTheme } from '../utils/theme';
+import { createCustomTheme } from '../theme'; // Atualizado
 
 interface ThemeContextType {
   themeSettings: ThemeSettings;

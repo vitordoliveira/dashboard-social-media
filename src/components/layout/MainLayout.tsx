@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Drawer, useMediaQuery, useTheme, Breadcrumbs, Link, Typography, LinearProgress } from '@mui/material';
+import { Box, useMediaQuery, useTheme, Breadcrumbs, Link, Typography, LinearProgress } from '@mui/material';
 import { useLocation, Link as RouterLink } from 'react-router-dom';
+import { useThemeContext } from '../../context/ThemeContext';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import { getMainLayoutStyles, DRAWER_WIDTH } from './MainLayout.styles';
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
-
-const DRAWER_WIDTH = 240;
 
 interface BreadcrumbItem {
   path: string;
@@ -41,26 +41,26 @@ const routeMap: Record<string, BreadcrumbItem[]> = {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const theme = useTheme();
+  const { themeSettings } = useThemeContext();
   const location = useLocation();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [sidebarOpen, setSidebarOpen] = useState(!isSmallScreen);
   const [isLoading, setIsLoading] = useState(false);
   const [pageTitle, setPageTitle] = useState('');
 
-  // Fecha a sidebar automaticamente em telas pequenas
+  const styles = getMainLayoutStyles(theme, sidebarOpen);
+
   useEffect(() => {
     if (isSmallScreen) {
       setSidebarOpen(false);
     }
   }, [isSmallScreen]);
 
-  // Atualiza o título da página baseado na rota
   useEffect(() => {
     const currentRoute = routeMap[location.pathname];
     if (currentRoute) {
       setPageTitle(currentRoute[currentRoute.length - 1].label);
     }
-    // Simula loading ao mudar de página
     setIsLoading(true);
     const timer = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(timer);
@@ -73,7 +73,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const currentBreadcrumbs = routeMap[location.pathname] || [];
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={styles.root}>
       {/* Sidebar */}
       <Sidebar 
         open={sidebarOpen} 
@@ -82,18 +82,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       />
       
       {/* Main content */}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          ml: { md: sidebarOpen ? `${DRAWER_WIDTH}px` : 0 },
-          width: { md: `calc(100% - ${sidebarOpen ? DRAWER_WIDTH : 0}px)` },
-          transition: theme.transitions.create(['margin', 'width'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
-        }}
-      >
+      <Box component="main" sx={styles.main}>
         {/* Header */}
         <Header 
           sidebarOpen={sidebarOpen}
@@ -105,68 +94,42 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
         {/* Loading indicator */}
         {isLoading && (
-          <LinearProgress 
-            sx={{ 
-              position: 'fixed', 
-              top: 64, 
-              left: 0, 
-              right: 0, 
-              zIndex: theme.zIndex.drawer + 1 
-            }} 
-          />
+          <LinearProgress sx={styles.loadingBar} />
         )}
 
         {/* Breadcrumbs */}
-        <Box 
-          sx={{ 
-            px: 3, 
-            py: 2,
-            bgcolor: 'background.paper',
-            borderBottom: 1,
-            borderColor: 'divider'
-          }}
-        >
-          <Breadcrumbs aria-label="breadcrumb">
-            {currentBreadcrumbs.map((item, index) => {
-              const isLast = index === currentBreadcrumbs.length - 1;
-              return isLast ? (
-                <Typography 
-                  key={item.path} 
-                  color="text.primary"
-                  sx={{ display: 'flex', alignItems: 'center' }}
-                >
-                  {item.label}
-                </Typography>
-              ) : (
-                <Link
-                  key={item.path}
-                  component={RouterLink}
-                  to={item.path}
-                  color="inherit"
-                  sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center',
-                    '&:hover': {
-                      textDecoration: 'none',
-                      color: 'primary.main'
-                    }
-                  }}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </Breadcrumbs>
-        </Box>
+        {themeSettings.showBreadcrumbs && (
+          <Box sx={styles.breadcrumbsContainer}>
+            <Breadcrumbs aria-label="breadcrumb">
+              {currentBreadcrumbs.map((item, index) => {
+                const isLast = index === currentBreadcrumbs.length - 1;
+                return isLast ? (
+                  <Typography 
+                    key={item.path} 
+                    color="text.primary"
+                    variant="body2"
+                    fontWeight="medium"
+                  >
+                    {item.label}
+                  </Typography>
+                ) : (
+                  <Link
+                    key={item.path}
+                    component={RouterLink}
+                    to={item.path}
+                    sx={styles.breadcrumbLink}
+                    variant="body2"
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </Breadcrumbs>
+          </Box>
+        )}
 
         {/* Page content */}
-        <Box 
-          sx={{ 
-            p: 3,
-            minHeight: 'calc(100vh - 128px)', // 64px header + 64px breadcrumbs
-            bgcolor: 'background.default'
-          }}
-        >
+        <Box sx={styles.content}>
           {children}
         </Box>
       </Box>
@@ -174,15 +137,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {/* Overlay for small screens when sidebar is open */}
       {isSmallScreen && sidebarOpen && (
         <Box
-          sx={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            bgcolor: 'rgba(0,0,0,0.5)',
-            zIndex: theme.zIndex.drawer - 1,
-          }}
+          sx={styles.overlay}
           onClick={handleDrawerToggle}
         />
       )}

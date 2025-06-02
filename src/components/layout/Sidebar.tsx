@@ -10,6 +10,7 @@ import {
   IconButton,
   useTheme,
   Typography,
+  Tooltip,
 } from '@mui/material';
 import {
   Dashboard,
@@ -22,12 +23,15 @@ import {
   Menu as MenuIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { getSidebarStyles } from './Sidebar.styles';
 
 interface MenuItem {
   id: string;
   text: string;
   icon: React.ReactElement;
   path: string;
+  section?: string;
 }
 
 interface SidebarProps {
@@ -36,120 +40,140 @@ interface SidebarProps {
   currentPath?: string;
 }
 
-const DRAWER_WIDTH = 240;
-
 const menuItems: MenuItem[] = [
-  { id: 'dashboard', text: 'Dashboard', icon: <Dashboard />, path: '/' },
-  { id: 'schedule', text: 'Agendar Posts', icon: <Schedule />, path: '/schedule' },
-  { id: 'monitoring', text: 'Monitoramento', icon: <Notifications />, path: '/monitoring' },
-  { id: 'analytics', text: 'Analytics', icon: <Analytics />, path: '/analytics' },
-  { id: 'audience', text: 'Audiência', icon: <People />, path: '/audience' },
-  { id: 'reports', text: 'Relatórios', icon: <Assessment />, path: '/reports' },
-  { id: 'settings', text: 'Configurações', icon: <Settings />, path: '/settings' },
+  { 
+    id: 'dashboard', 
+    text: 'Dashboard', 
+    icon: <Dashboard />, 
+    path: '/',
+    section: 'Principal'
+  },
+  { 
+    id: 'schedule', 
+    text: 'Agendar Posts', 
+    icon: <Schedule />, 
+    path: '/schedule',
+    section: 'Principal'
+  },
+  { 
+    id: 'monitoring', 
+    text: 'Monitoramento', 
+    icon: <Notifications />, 
+    path: '/monitoring',
+    section: 'Principal'
+  },
+  { 
+    id: 'analytics', 
+    text: 'Analytics', 
+    icon: <Analytics />, 
+    path: '/analytics',
+    section: 'Análise'
+  },
+  { 
+    id: 'audience', 
+    text: 'Audiência', 
+    icon: <People />, 
+    path: '/audience',
+    section: 'Análise'
+  },
+  { 
+    id: 'reports', 
+    text: 'Relatórios', 
+    icon: <Assessment />, 
+    path: '/reports',
+    section: 'Análise'
+  },
+  { 
+    id: 'settings', 
+    text: 'Configurações', 
+    icon: <Settings />, 
+    path: '/settings',
+    section: 'Sistema'
+  },
 ];
 
 const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, currentPath = '/' }) => {
   const theme = useTheme();
+  const styles = getSidebarStyles(theme);
+  const navigate = useNavigate();
+
+  // Agrupa os itens do menu por seção
+  const menuSections = menuItems.reduce((acc, item) => {
+    const section = item.section || 'Outros';
+    if (!acc[section]) {
+      acc[section] = [];
+    }
+    acc[section].push(item);
+    return acc;
+  }, {} as Record<string, MenuItem[]>);
+
+  const handleMenuItemClick = (path: string) => {
+    navigate(path);
+  };
 
   return (
     <>
       {/* Botão de toggle quando sidebar está fechada */}
       {!open && (
-        <IconButton
-          onClick={onToggle}
-          sx={{
-            position: 'fixed',
-            left: '20px',
-            top: '20px',
-            zIndex: theme.zIndex.drawer + 2,
-            bgcolor: 'background.paper',
-            '&:hover': {
-              bgcolor: 'action.hover',
-            },
-          }}
-        >
-          <MenuIcon />
-        </IconButton>
+        <Tooltip title="Abrir menu" placement="right">
+          <IconButton
+            onClick={onToggle}
+            sx={styles.toggleButton}
+          >
+            <MenuIcon />
+          </IconButton>
+        </Tooltip>
       )}
 
-      <Box 
-        component="nav" 
-        sx={{ 
-          width: open ? DRAWER_WIDTH : 0, 
-          flexShrink: 0,
-          transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-        }}
-      >
+      <Box component="nav" sx={styles.nav(open)}>
         <Drawer
           variant="persistent"
           anchor="left"
           open={open}
-          sx={{
-            width: DRAWER_WIDTH,
-            '& .MuiDrawer-paper': {
-              width: DRAWER_WIDTH,
-              boxSizing: 'border-box',
-              backgroundColor: 'background.paper',
-              borderRight: `1px solid ${theme.palette.divider}`,
-            },
-          }}
+          sx={styles.drawer}
         >
           {/* Header da Sidebar */}
-          <Box sx={{ 
-            height: 64, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between',
-            px: 2,
-            borderBottom: `1px solid ${theme.palette.divider}`
-          }}>
-            <Typography variant="h6" component="div">
+          <Box sx={styles.header}>
+            <Typography variant="h6" sx={styles.logo}>
               Social Media
             </Typography>
-            <IconButton onClick={onToggle}>
+            <IconButton onClick={onToggle} sx={styles.closeButton}>
               <CloseIcon />
             </IconButton>
           </Box>
 
           {/* Lista de Menu */}
-          <List sx={{ mt: 1 }}>
-            {menuItems.map((item) => (
-              <ListItem key={item.id} disablePadding>
-                <ListItemButton
-                  selected={currentPath === item.path}
-                  sx={{
-                    '&.Mui-selected': {
-                      bgcolor: 'action.selected',
-                      '&:hover': {
-                        bgcolor: 'action.selected',
-                      },
-                    },
-                    '&:hover': {
-                      bgcolor: 'action.hover',
-                    },
-                  }}
-                >
-                  <ListItemIcon sx={{ 
-                    color: currentPath === item.path ? 'primary.main' : 'inherit',
-                    minWidth: 40,
-                  }}>
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText 
-                    primary={item.text}
-                    primaryTypographyProps={{
-                      sx: { 
-                        color: currentPath === item.path ? 'primary.main' : 'inherit',
-                      }
-                    }}
-                  />
-                </ListItemButton>
-              </ListItem>
+          <Box sx={{ overflow: 'auto' }}>
+            {Object.entries(menuSections).map(([section, items]) => (
+              <React.Fragment key={section}>
+                <Box sx={styles.menuSection}>
+                  <Typography>{section}</Typography>
+                </Box>
+                <List sx={styles.menuList}>
+                  {items.map((item) => {
+                    const isSelected = currentPath === item.path;
+                    return (
+                      <ListItem key={item.id} disablePadding>
+                        <ListItemButton
+                          selected={isSelected}
+                          onClick={() => handleMenuItemClick(item.path)}
+                          sx={styles.menuItem(isSelected)}
+                        >
+                          <ListItemIcon sx={styles.menuIcon(isSelected)}>
+                            {item.icon}
+                          </ListItemIcon>
+                          <ListItemText 
+                            primary={item.text}
+                            sx={styles.menuText}
+                          />
+                        </ListItemButton>
+                      </ListItem>
+                    );
+                  })}
+                </List>
+              </React.Fragment>
             ))}
-          </List>
+          </Box>
         </Drawer>
       </Box>
     </>

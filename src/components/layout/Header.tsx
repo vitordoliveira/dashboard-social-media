@@ -19,14 +19,18 @@ import {
   Logout,
   Person,
   Menu as MenuIcon,
+  ChevronRight,
 } from '@mui/icons-material';
+import { getHeaderStyles } from './Header.styles';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 interface HeaderProps {
   sidebarOpen: boolean;
   userName?: string;
   pageTitle?: string;
   notificationsCount?: number;
-  onSidebarToggle: () => void; // Nova prop adicionada
+  onSidebarToggle: () => void;
   onLogout?: () => void;
   onProfileClick?: () => void;
   onSettingsClick?: () => void;
@@ -43,8 +47,11 @@ const Header: React.FC<HeaderProps> = ({
   onSettingsClick,
 }) => {
   const theme = useTheme();
+  const styles = getHeaderStyles(theme);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notificationAnchor, setNotificationAnchor] = useState<null | HTMLElement>(null);
+
+  const currentDate = format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR });
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -63,57 +70,56 @@ const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <AppBar 
-      position="sticky" 
-      sx={{ 
-        backgroundColor: 'background.paper',
-        boxShadow: 1,
-        zIndex: theme.zIndex.drawer + 1,
-      }}
-    >
-      <Toolbar sx={{ justifyContent: 'space-between' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+    <AppBar position="sticky" sx={styles.appBar}>
+      <Toolbar>
+        <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
           <IconButton
-            color="inherit"
-            aria-label="toggle sidebar"
             onClick={onSidebarToggle}
             edge="start"
-            sx={{ mr: 2 }}
+            sx={styles.menuButton}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" component="div">
-            {pageTitle}
-          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography variant="h6" sx={styles.headerTitle}>
+              {pageTitle}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {currentDate}
+            </Typography>
+          </Box>
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* Notificações */}
           <IconButton 
-            color="inherit"
+            sx={styles.actionButton}
             onClick={handleNotificationOpen}
           >
-            <Badge badgeContent={notificationsCount} color="error">
+            <Badge 
+              badgeContent={notificationsCount} 
+              sx={styles.notificationsBadge}
+            >
               <Notifications />
             </Badge>
           </IconButton>
 
-          {/* Menu do Usuário */}
-          <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={handleMenuOpen}>
-            <Avatar 
-              sx={{ 
-                width: 32, 
-                height: 32,
-                bgcolor: 'primary.main',
-                fontSize: '1rem',
-                mr: 1
-              }}
-            >
+          <Box 
+            sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} 
+            onClick={handleMenuOpen}
+          >
+            <Avatar sx={styles.userAvatar}>
               {userName.charAt(0).toUpperCase()}
             </Avatar>
-            <Typography variant="body2" sx={{ mr: 1 }}>
+            <Typography variant="body2" sx={styles.userName}>
               {userName}
             </Typography>
+            <ChevronRight 
+              sx={{ 
+                transform: Boolean(anchorEl) ? 'rotate(90deg)' : 'none',
+                transition: 'transform 0.2s',
+                color: 'text.secondary',
+              }} 
+            />
           </Box>
         </Box>
 
@@ -122,17 +128,16 @@ const Header: React.FC<HeaderProps> = ({
           anchorEl={notificationAnchor}
           open={Boolean(notificationAnchor)}
           onClose={handleNotificationClose}
-          PaperProps={{
-            sx: {
-              width: 320,
-              maxHeight: 400,
-            }
-          }}
+          PaperProps={{ sx: styles.menuPaper }}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         >
-          <Box sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
+          <Box sx={styles.notificationHeader}>
+            <Typography variant="subtitle1" fontWeight="medium">
               Notificações
             </Typography>
+          </Box>
+          <Box sx={styles.notificationContent}>
             {notificationsCount === 0 ? (
               <Typography variant="body2" color="text.secondary">
                 Não há novas notificações
@@ -150,31 +155,31 @@ const Header: React.FC<HeaderProps> = ({
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
-          PaperProps={{
-            sx: { 
-              width: 220,
-              mt: 1
-            }
-          }}
+          PaperProps={{ sx: styles.userMenuPaper }}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         >
-          <MenuItem onClick={onProfileClick}>
+          <MenuItem onClick={onProfileClick} sx={styles.menuItem}>
             <ListItemIcon>
               <Person fontSize="small" />
             </ListItemIcon>
-            Perfil
+            <Typography variant="body2">Perfil</Typography>
           </MenuItem>
-          <MenuItem onClick={onSettingsClick}>
+          <MenuItem onClick={onSettingsClick} sx={styles.menuItem}>
             <ListItemIcon>
               <Settings fontSize="small" />
             </ListItemIcon>
-            Configurações
+            <Typography variant="body2">Configurações</Typography>
           </MenuItem>
-          <Divider />
-          <MenuItem onClick={onLogout} sx={{ color: 'error.main' }}>
+          <Divider sx={styles.divider} />
+          <MenuItem 
+            onClick={onLogout} 
+            sx={{ ...styles.menuItem, ...styles.menuItemDanger }}
+          >
             <ListItemIcon>
-              <Logout fontSize="small" sx={{ color: 'error.main' }} />
+              <Logout fontSize="small" color="error" />
             </ListItemIcon>
-            Sair
+            <Typography variant="body2">Sair</Typography>
           </MenuItem>
         </Menu>
       </Toolbar>

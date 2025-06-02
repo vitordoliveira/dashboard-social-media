@@ -1,13 +1,14 @@
 import React, { useMemo } from 'react';
 import { ResponsiveLine } from '@nivo/line';
-import { Box, Paper, Typography, useTheme, alpha, Skeleton, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
-import { MoreVert, GetApp, Timeline, Fullscreen } from '@mui/icons-material';
+import { Box, Paper, Typography, useTheme, alpha, Skeleton, IconButton, Menu, MenuItem } from '@mui/material';
+import { MoreVert, GetApp, Timeline } from '@mui/icons-material';
 import { formatNumber } from '../../utils/formatters';
 
 interface DataPoint {
   x: string | number;
   y: number;
   percentage?: number;
+  formattedY?: string;
 }
 
 interface Series {
@@ -51,143 +52,156 @@ const LineChart: React.FC<LineChartProps> = ({
 
   const chartTheme = useMemo(() => ({
     background: 'transparent',
-    textColor: theme.palette.text.secondary,
+    textColor: '#8F8F8F',
     fontSize: 11,
     axis: {
       domain: {
         line: {
-          stroke: theme.palette.divider,
+          stroke: '#333333',
           strokeWidth: 1,
         },
       },
       ticks: {
         line: {
-          stroke: theme.palette.divider,
+          stroke: '#333333',
           strokeWidth: 1,
         },
         text: {
-          fill: theme.palette.text.secondary,
+          fill: '#8F8F8F',
           fontSize: 11,
+          fontFamily: 'Inter, sans-serif'
         },
       },
     },
     grid: {
       line: {
-        stroke: alpha(theme.palette.divider, 0.1),
+        stroke: '#282828',
         strokeWidth: 1,
       },
     },
     legends: {
       text: {
-        fill: theme.palette.text.secondary,
+        fill: '#8F8F8F',
         fontSize: 11,
+        fontFamily: 'Inter, sans-serif'
       },
     },
     tooltip: {
       container: {
-        background: theme.palette.background.paper,
-        color: theme.palette.text.primary,
-        fontSize: 12,
+        background: '#1A1A1A',
+        color: '#FFFFFF',
+        fontSize: 11,
+        fontFamily: 'Inter, sans-serif',
+        borderRadius: 4,
+        boxShadow: '0 4px 8px rgba(0,0,0,0.25)'
       },
     },
     crosshair: {
       line: {
-        stroke: theme.palette.divider,
+        stroke: '#404040',
         strokeWidth: 1,
-        strokeOpacity: 0.35,
-      },
-    },
-  }), [theme]);
+        strokeDasharray: '4 4'
+      }
+    }
+  }), []);
 
   if (isLoading) {
     return (
       <Paper 
+        elevation={0}
         sx={{ 
-          p: 3, 
+          p: 2, 
           height, 
-          backgroundImage: 'none'
+          bgcolor: '#1A1A1A',
+          border: '1px solid #282828',
+          borderRadius: 1
         }}
       >
-        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Skeleton variant="text" width={200} height={32} />
-          <Skeleton variant="circular" width={40} height={40} />
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Skeleton variant="text" width={200} height={24} sx={{ bgcolor: '#282828' }} />
+          <Skeleton variant="circular" width={32} height={32} sx={{ bgcolor: '#282828' }} />
         </Box>
-        <Skeleton variant="rectangular" height={height - 100} />
+        <Skeleton 
+          variant="rectangular" 
+          height={height - 60}
+          sx={{ bgcolor: '#282828', borderRadius: 1 }}
+        />
       </Paper>
     );
   }
 
   return (
     <Paper 
+      elevation={0}
       sx={{ 
-        p: 3, 
+        p: 2, 
         height, 
-        backgroundImage: 'none',
+        bgcolor: '#1A1A1A',
         position: 'relative',
         overflow: 'hidden',
-        transition: 'all 0.3s ease-in-out',
-        '&:hover': {
-          boxShadow: theme.shadows[4]
-        },
-        '&:before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '4px',
-          background: `linear-gradient(90deg, 
-            ${alpha(theme.palette.primary.main, 0.1)} 0%, 
-            ${alpha(theme.palette.primary.main, 0.3)} 100%
-          )`,
-        }
+        border: '1px solid #282828',
+        borderRadius: 1
       }}
     >
       <Box sx={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
-        mb: 3
+        mb: 2
       }}>
         <Typography 
-          variant="h6" 
           sx={{ 
-            fontWeight: 600,
-            color: theme.palette.text.primary
+            color: '#FFFFFF',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            fontFamily: 'Inter, sans-serif'
           }}
         >
           {title}
         </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
           {onDownload && (
-            <Tooltip title="Exportar dados">
-              <IconButton size="small" onClick={onDownload}>
-                <GetApp fontSize="small" />
-              </IconButton>
-            </Tooltip>
+            <IconButton 
+              size="small" 
+              onClick={onDownload}
+              sx={{ 
+                color: '#8F8F8F',
+                '&:hover': {
+                  color: '#FFFFFF',
+                  bgcolor: 'rgba(255,255,255,0.1)'
+                }
+              }}
+            >
+              <GetApp sx={{ fontSize: 16 }} />
+            </IconButton>
           )}
           {onViewTrend && (
-            <Tooltip title="Ver tendência">
-              <IconButton size="small" onClick={onViewTrend}>
-                <Timeline fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
-          {onToggleFullscreen && (
-            <Tooltip title="Tela cheia">
-              <IconButton size="small" onClick={onToggleFullscreen}>
-                <Fullscreen fontSize="small" />
-              </IconButton>
-            </Tooltip>
+            <IconButton 
+              size="small" 
+              onClick={onViewTrend}
+              sx={{ 
+                color: '#8F8F8F',
+                '&:hover': {
+                  color: '#FFFFFF',
+                  bgcolor: 'rgba(255,255,255,0.1)'
+                }
+              }}
+            >
+              <Timeline sx={{ fontSize: 16 }} />
+            </IconButton>
           )}
           <IconButton
             size="small"
             onClick={handleClick}
-            aria-controls={open ? 'chart-menu' : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? 'true' : undefined}
+            sx={{ 
+              color: '#8F8F8F',
+              '&:hover': {
+                color: '#FFFFFF',
+                bgcolor: 'rgba(255,255,255,0.1)'
+              }
+            }}
           >
-            <MoreVert fontSize="small" />
+            <MoreVert sx={{ fontSize: 16 }} />
           </IconButton>
         </Box>
         <Menu
@@ -195,8 +209,20 @@ const LineChart: React.FC<LineChartProps> = ({
           anchorEl={anchorEl}
           open={open}
           onClose={handleClose}
-          MenuListProps={{
-            'aria-labelledby': 'chart-button',
+          PaperProps={{
+            sx: {
+              bgcolor: '#1A1A1A',
+              border: '1px solid #282828',
+              borderRadius: 1,
+              '& .MuiMenuItem-root': {
+                color: '#FFFFFF',
+                fontSize: '0.875rem',
+                fontFamily: 'Inter, sans-serif',
+                '&:hover': {
+                  bgcolor: 'rgba(255,255,255,0.1)'
+                }
+              }
+            }
           }}
         >
           <MenuItem onClick={() => {
@@ -211,22 +237,16 @@ const LineChart: React.FC<LineChartProps> = ({
           }}>
             Análise de Tendência
           </MenuItem>
-          <MenuItem onClick={() => {
-            handleClose();
-            onToggleFullscreen?.();
-          }}>
-            Tela Cheia
-          </MenuItem>
         </Menu>
       </Box>
-      <Box sx={{ height: height - 100 }}>
+      <Box sx={{ height: height - 60 }}>
         <ResponsiveLine
           data={data}
           margin={{ 
-            top: 20, 
+            top: 10, 
             right: showLegend ? 110 : 20, 
-            bottom: 50, 
-            left: 60 
+            bottom: 30, 
+            left: 50 
           }}
           xScale={{ type: 'point' }}
           yScale={{ 
@@ -234,7 +254,8 @@ const LineChart: React.FC<LineChartProps> = ({
             min: 'auto', 
             max: 'auto',
             stacked: false,
-            reverse: false 
+            reverse: false,
+            nice: true
           }}
           curve="monotoneX"
           axisTop={null}
@@ -242,29 +263,26 @@ const LineChart: React.FC<LineChartProps> = ({
           axisBottom={{
             tickSize: 5,
             tickPadding: 5,
-            tickRotation: -45,
-            legend: '',
-            legendOffset: 36,
-            legendPosition: 'middle',
+            tickRotation: 0,
           }}
           axisLeft={{
             tickSize: 5,
-            tickPadding: 5,
+            tickPadding: 8,
             tickRotation: 0,
-            legend: '',
-            legendOffset: -40,
-            legendPosition: 'middle',
-            format: formatNumber,
+            format: value => {
+              if (value >= 1000000) return `${(value/1000000).toFixed(1)}M`;
+              if (value >= 1000) return `${(value/1000).toFixed(0)}K`;
+              return value;
+            },
           }}
-          enableGridX={false}
+          enableGridX={true}
           enableGridY={true}
-          pointSize={8}
-          pointColor={{ theme: 'background' }}
+          pointSize={4}
+          pointColor="#1A1A1A"
           pointBorderWidth={2}
           pointBorderColor={{ from: 'serieColor' }}
-          pointLabelYOffset={-12}
-          enableArea={true}
-          areaOpacity={0.1}
+          enableArea={false}
+          lineWidth={1.5}
           useMesh={true}
           enableSlices="x"
           crosshairType="cross"
@@ -275,19 +293,18 @@ const LineChart: React.FC<LineChartProps> = ({
               justify: false,
               translateX: 100,
               translateY: 0,
-              itemsSpacing: 0,
+              itemsSpacing: 4,
               itemDirection: 'left-to-right',
-              itemWidth: 80,
-              itemHeight: 20,
-              itemOpacity: 0.75,
-              symbolSize: 12,
+              itemWidth: 90,
+              itemHeight: 18,
+              itemOpacity: 1,
+              symbolSize: 6,
               symbolShape: 'circle',
-              symbolBorderColor: 'rgba(0, 0, 0, .5)',
               effects: [
                 {
                   on: 'hover',
                   style: {
-                    itemBackground: alpha(theme.palette.action.hover, 0.1),
+                    itemBackground: '#282828',
                     itemOpacity: 1
                   }
                 }
@@ -295,57 +312,45 @@ const LineChart: React.FC<LineChartProps> = ({
             }
           ] : []}
           theme={chartTheme}
+          colors={data.map(d => d.color || '#000')}
           tooltip={({ point }) => (
             <Box
               sx={{
-                background: alpha(theme.palette.background.paper, 0.95),
-                padding: 1.5,
-                border: `1px solid ${theme.palette.divider}`,
+                p: 1,
+                bgcolor: '#1A1A1A',
+                border: '1px solid #282828',
                 borderRadius: 1,
-                boxShadow: theme.shadows[3],
-                backdropFilter: 'blur(8px)',
               }}
             >
               <Typography
-                variant="subtitle2"
                 sx={{ 
-                  color: point.color,
-                  mb: 0.5,
-                  fontWeight: 600
+                  color: point.seriesColor,
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  mb: 0.5
                 }}
               >
                 {point.seriesId}
               </Typography>
               <Typography
-                variant="body2"
                 sx={{
-                  color: theme.palette.text.primary,
-                  fontWeight: 500,
-                  mb: 0.5
+                  color: '#FFFFFF',
+                  fontSize: '0.75rem',
+                  fontWeight: 500
                 }}
               >
-                {String(point.data.x)}
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: theme.palette.text.secondary
-                }}
-              >
-                {formatNumber(point.data.y)}
+                {point.data.formattedY || formatNumber(point.data.y)}
               </Typography>
               {point.data.percentage !== undefined && (
                 <Typography
-                  variant="caption"
                   sx={{
-                    color: point.data.percentage > 0 
-                      ? theme.palette.success.main 
-                      : theme.palette.error.main,
-                    display: 'block',
+                    color: point.data.percentage > 0 ? '#4CAF50' : '#F44336',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
                     mt: 0.5
                   }}
                 >
-                  {point.data.percentage > 0 ? '+' : ''}{point.data.percentage}%
+                  {point.data.percentage > 0 ? '+' : ''}{point.data.percentage.toFixed(1)}%
                 </Typography>
               )}
             </Box>

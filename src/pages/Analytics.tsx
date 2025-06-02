@@ -1,9 +1,23 @@
 import React from 'react';
-import { Box, Typography, Grid, useTheme, alpha } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Box, Typography, useTheme, alpha, styled } from '@mui/material';
+import { motion } from 'framer-motion';
 import { useAnalyticsData } from '../hooks/useAnalyticsData';
 import { AnalyticsProps } from '../types/analytics';
 import DateRangeFilter from '../components/dashboard/DateRangeFilter';
+import NetworkPerformance from '../components/analytics/NetworkPerformance';
+import AudienceMetrics from '../components/analytics/AudienceMetrics';
+
+const StatsGrid = styled(Box)(({ theme }) => ({
+  display: 'grid',
+  gap: theme.spacing(3),
+  gridTemplateColumns: 'repeat(1, 1fr)',
+  [theme.breakpoints.up('sm')]: {
+    gridTemplateColumns: 'repeat(2, 1fr)',
+  },
+  [theme.breakpoints.up('md')]: {
+    gridTemplateColumns: 'repeat(4, 1fr)',
+  },
+}));
 
 const Analytics: React.FC<AnalyticsProps> = ({ dateRange, dateRangeType, onDateRangeChange }) => {
   const theme = useTheme();
@@ -63,88 +77,109 @@ const Analytics: React.FC<AnalyticsProps> = ({ dateRange, dateRangeType, onDateR
       minHeight: '100vh',
       background: alpha(theme.palette.background.default, 0.6)
     }}>
-      <AnimatePresence mode="wait">
-        {/* Header com filtro de data */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+      {/* Header com filtro de data */}
+      <motion.div
+        key="header"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Box
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 4,
+            mt: 2,
+            flexWrap: 'wrap',
+            gap: 2
+          }}
         >
-          <Box
-            sx={{ 
-              display: 'flex', 
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              mb: 4,
-              mt: 2,
-              flexWrap: 'wrap',
-              gap: 2
+          <Typography 
+            variant="h5" 
+            component="h1"
+            sx={{
+              fontWeight: 600,
+              color: theme.palette.text.primary,
+              fontSize: { xs: '1.5rem', sm: '2rem' }
             }}
           >
-            <Typography 
-              variant="h5" 
-              component="h1"
-              sx={{
-                fontWeight: 600,
-                color: theme.palette.text.primary,
-                fontSize: { xs: '1.5rem', sm: '2rem' }
-              }}
-            >
-              Analytics Detalhado
-            </Typography>
-            <DateRangeFilter 
-              value={dateRangeType} 
-              onChange={onDateRangeChange}
-            />
-          </Box>
-        </motion.div>
+            Analytics Detalhado
+          </Typography>
+          <DateRangeFilter 
+            value={dateRangeType} 
+            onChange={onDateRangeChange}
+          />
+        </Box>
+      </motion.div>
 
-        {/* Global Stats */}
+      {/* Global Stats */}
+      <motion.div
+        key="stats"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <StatsGrid>
+          {stats.map((stat, index) => (
+            <motion.div key={`stat-${index}`} variants={itemVariants}>
+              <Box
+                sx={{
+                  p: 3,
+                  bgcolor: alpha(stat.color, 0.1),
+                  borderRadius: 2,
+                  border: `1px solid ${alpha(stat.color, 0.2)}`
+                }}
+              >
+                <Typography variant="subtitle2" color="textSecondary">
+                  {stat.title}
+                </Typography>
+                <Typography 
+                  variant="h4" 
+                  sx={{ 
+                    mt: 1, 
+                    textTransform: stat.title.includes('Rede') ? 'capitalize' : 'none' 
+                  }}
+                >
+                  {stat.value}
+                </Typography>
+              </Box>
+            </motion.div>
+          ))}
+        </StatsGrid>
+      </motion.div>
+
+      {/* Network Performance */}
+      <Box sx={{ mt: 4 }}>
         <motion.div
+          key="network"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          <Grid container spacing={3}>
-            {stats.map((stat) => {
-              const gridProps = {
-                item: true,
-                xs: 12,
-                md: 6,
-                lg: 3
-              };
-              
-              return (
-                <Grid {...gridProps} key={stat.title}>
-                  <motion.div variants={itemVariants}>
-                    <Box
-                      sx={{
-                        p: 3,
-                        bgcolor: alpha(stat.color, 0.1),
-                        borderRadius: 2,
-                        border: `1px solid ${alpha(stat.color, 0.2)}`
-                      }}
-                    >
-                      <Typography variant="subtitle2" color="textSecondary">
-                        {stat.title}
-                      </Typography>
-                      <Typography 
-                        variant="h4" 
-                        sx={{ 
-                          mt: 1, 
-                          textTransform: stat.title.includes('Rede') ? 'capitalize' : 'none' 
-                        }}
-                      >
-                        {stat.value}
-                      </Typography>
-                    </Box>
-                  </motion.div>
-                </Grid>
-              );
-            })}
-          </Grid>
+          <NetworkPerformance 
+            networkData={networkAnalytics}
+            isLoading={isLoading}
+            dateRange={dateRange}
+          />
         </motion.div>
-      </AnimatePresence>
+      </Box>
+
+      {/* Audience Metrics */}
+      <Box sx={{ mt: 4 }}>
+        <motion.div
+          key="audience"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <AudienceMetrics 
+            networkData={networkAnalytics}
+            isLoading={isLoading}
+            dateRange={dateRange}
+          />
+        </motion.div>
+      </Box>
     </Box>
   );
 };

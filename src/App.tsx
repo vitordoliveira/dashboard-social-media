@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ThemeProvider as MuiThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { ThemeProvider as MuiThemeProvider, CssBaseline } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
 import Dashboard from './pages/Dashboard';
@@ -13,7 +13,7 @@ import { useThemeContext } from './context/ThemeContext';
 
 // Componente que usa o contexto do tema
 const AppWithTheme: React.FC = () => {
-  const { themeSettings } = useThemeContext();
+  const { theme } = useThemeContext(); // Agora usando o tema do contexto
   
   // Estado para controle de datas (mantido no App para compartilhar entre páginas)
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -29,32 +29,6 @@ const AppWithTheme: React.FC = () => {
       setDateRange(range);
     }
   };
-
-  // Criação do tema baseado nas configurações
-  const theme = createTheme({
-    palette: {
-      mode: themeSettings.mode,
-      primary: {
-        main: themeSettings.primaryColor,
-      },
-      secondary: {
-        main: '#f48fb1',
-      },
-      background: {
-        default: themeSettings.mode === 'dark' ? '#1a1a1a' : '#f5f5f5',
-        paper: themeSettings.mode === 'dark' ? '#2d2d2d' : '#ffffff',
-      },
-    },
-    components: {
-      MuiPaper: {
-        styleOverrides: {
-          root: {
-            backgroundImage: 'none',
-          },
-        },
-      },
-    },
-  });
 
   return (
     <MuiThemeProvider theme={theme}>

@@ -19,7 +19,8 @@ import {
   Timeline, 
   Fullscreen,
   ZoomIn,
-  ZoomOut
+  ZoomOut,
+  TrendingUp
 } from '@mui/icons-material';
 import { formatNumber } from '../../utils/formatters';
 import { colorPalettes, socialColors } from '../../theme/constants/colors';
@@ -63,7 +64,7 @@ const LineChart: React.FC<LineChartProps> = ({
   enableGridX = false,
   enableGridY = true,
   enablePoints = true,
-  lineWidth = 2.5,
+  lineWidth = 3, // Aumentamos a largura da linha para maior visibilidade
   onDownload,
   onToggleFullscreen,
   onViewTrend
@@ -97,7 +98,7 @@ const LineChart: React.FC<LineChartProps> = ({
   // Cores específicas para o tema escuro e claro
   const chartColors = useMemo(() => {
     const baseColors = {
-      grid: isDarkMode ? alpha(theme.palette.divider, 0.1) : alpha(theme.palette.divider, 0.2),
+      grid: isDarkMode ? alpha(theme.palette.divider, 0.12) : alpha(theme.palette.divider, 0.2),
       background: isDarkMode 
         ? alpha(theme.palette.background.paper, 0.6)
         : alpha(theme.palette.background.paper, 0.8),
@@ -105,11 +106,14 @@ const LineChart: React.FC<LineChartProps> = ({
         ? alpha(theme.palette.background.paper, 0.95)
         : alpha(theme.palette.background.paper, 0.95),
       tooltipBorder: isDarkMode 
-        ? theme.palette.divider 
+        ? alpha(theme.palette.primary.main, 0.3) 
         : alpha(theme.palette.primary.main, 0.2),
       crosshair: isDarkMode
-        ? alpha(theme.palette.primary.main, 0.4)
-        : alpha(theme.palette.primary.main, 0.3)
+        ? alpha(theme.palette.primary.main, 0.5)
+        : alpha(theme.palette.primary.main, 0.4),
+      tickLabels: isDarkMode
+        ? alpha(theme.palette.text.secondary, 0.85)
+        : theme.palette.text.secondary
     };
     
     return baseColors;
@@ -117,7 +121,17 @@ const LineChart: React.FC<LineChartProps> = ({
 
   // Gere uma paleta de cores para os gráficos se não houver cores fornecidas
   const generateChartColors = useMemo(() => {
-    const defaultColors = [
+    // Cores mais vibrantes para o tema escuro
+    const defaultColors = isDarkMode ? [
+      alpha(socialColors.facebook, 1),
+      alpha(socialColors.twitter, 1), 
+      alpha(socialColors.instagram, 1), 
+      alpha(socialColors.linkedin, 1),
+      alpha(colorPalettes.purple.main, 1),
+      alpha(colorPalettes.teal.main, 1),
+      alpha(colorPalettes.amber.main, 1),
+      alpha(colorPalettes.green.main, 1)
+    ] : [
       socialColors.facebook,
       socialColors.twitter, 
       socialColors.instagram, 
@@ -133,12 +147,12 @@ const LineChart: React.FC<LineChartProps> = ({
     );
 
     return usedColors;
-  }, [data]);
+  }, [data, isDarkMode]);
 
   // Tema do gráfico baseado na paleta do Material UI
   const chartTheme = useMemo(() => ({
     background: 'transparent',
-    textColor: theme.palette.text.secondary,
+    textColor: chartColors.tickLabels,
     fontSize: 12,
     fontFamily: theme.typography.fontFamily,
     axis: {
@@ -154,16 +168,17 @@ const LineChart: React.FC<LineChartProps> = ({
           strokeWidth: 1,
         },
         text: {
-          fill: theme.palette.text.secondary,
+          fill: chartColors.tickLabels,
           fontSize: 11,
           fontFamily: theme.typography.fontFamily,
+          fontWeight: 500, // Aumentada a espessura para melhor legibilidade
         },
       },
       legend: {
         text: {
           fill: theme.palette.text.primary,
           fontSize: 12,
-          fontWeight: 500,
+          fontWeight: 600, // Aumentada a espessura para melhor legibilidade
           fontFamily: theme.typography.fontFamily,
         }
       }
@@ -172,14 +187,15 @@ const LineChart: React.FC<LineChartProps> = ({
       line: {
         stroke: chartColors.grid,
         strokeWidth: 1,
-        strokeDasharray: isDarkMode ? '4 4' : '2 4',
+        strokeDasharray: isDarkMode ? '3 5' : '2 4', // Ajustado para melhor visibilidade
       },
     },
     legends: {
       text: {
         fill: theme.palette.text.secondary,
-        fontSize: 11,
+        fontSize: 12, // Aumentado o tamanho para melhor legibilidade
         fontFamily: theme.typography.fontFamily,
+        fontWeight: 500, // Adicionada a espessura para melhor legibilidade
       },
     },
     tooltip: {
@@ -189,7 +205,7 @@ const LineChart: React.FC<LineChartProps> = ({
         fontSize: 12,
         fontFamily: theme.typography.fontFamily,
         borderRadius: 8,
-        boxShadow: theme.shadows[3],
+        boxShadow: isDarkMode ? '0 4px 20px rgba(0,0,0,0.25)' : theme.shadows[3],
         border: `1px solid ${chartColors.tooltipBorder}`,
       },
     },
@@ -277,8 +293,9 @@ const LineChart: React.FC<LineChartProps> = ({
         borderRadius: 2,
         border: isDarkMode ? `1px solid ${alpha(theme.palette.divider, 0.1)}` : 'none',
         transition: 'all 0.3s ease',
+        overflow: 'hidden', // Para garantir que o brilho não ultrapasse o contêiner
         '&:hover': {
-          boxShadow: isDarkMode ? `0 4px 20px ${alpha('#000', 0.1)}` : theme.shadows[3],
+          boxShadow: isDarkMode ? `0 4px 20px ${alpha('#000', 0.15)}` : theme.shadows[3],
         },
         '&::before': {
           content: '""',
@@ -305,16 +322,24 @@ const LineChart: React.FC<LineChartProps> = ({
           variant="h6"
           sx={{ 
             color: theme.palette.text.primary,
-            fontSize: '1rem',
+            fontSize: '1.05rem',
             fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
           }}
         >
+          <TrendingUp sx={{ 
+            color: theme.palette.primary.main, 
+            fontSize: '1.2rem',
+            filter: isDarkMode ? 'drop-shadow(0 0 1px rgba(255,255,255,0.2))' : 'none'
+          }} />
           {title}
         </Typography>
         <Box sx={{ display: 'flex', gap: 0.5 }}>
           {!isMobile && (
             <>
-              <Tooltip title="Diminuir zoom">
+              <Tooltip title="Diminuir zoom" arrow>
                 <IconButton 
                   size="small" 
                   onClick={() => handleZoom('out')}
@@ -324,13 +349,16 @@ const LineChart: React.FC<LineChartProps> = ({
                     '&:hover': {
                       color: theme.palette.primary.main,
                       bgcolor: alpha(theme.palette.primary.main, 0.1),
+                    },
+                    '&.Mui-disabled': {
+                      color: alpha(theme.palette.text.disabled, 0.5)
                     }
                   }}
                 >
                   <ZoomOut fontSize="small" />
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Aumentar zoom">
+              <Tooltip title="Aumentar zoom" arrow>
                 <IconButton 
                   size="small" 
                   onClick={() => handleZoom('in')}
@@ -340,6 +368,9 @@ const LineChart: React.FC<LineChartProps> = ({
                     '&:hover': {
                       color: theme.palette.primary.main,
                       bgcolor: alpha(theme.palette.primary.main, 0.1),
+                    },
+                    '&.Mui-disabled': {
+                      color: alpha(theme.palette.text.disabled, 0.5)
                     }
                   }}
                 >
@@ -350,7 +381,7 @@ const LineChart: React.FC<LineChartProps> = ({
           )}
           
           {onDownload && (
-            <Tooltip title="Exportar dados">
+            <Tooltip title="Exportar dados" arrow>
               <IconButton 
                 size="small" 
                 onClick={onDownload}
@@ -368,7 +399,7 @@ const LineChart: React.FC<LineChartProps> = ({
           )}
           
           {onViewTrend && (
-            <Tooltip title="Análise de tendência">
+            <Tooltip title="Análise de tendência" arrow>
               <IconButton 
                 size="small" 
                 onClick={onViewTrend}
@@ -386,7 +417,7 @@ const LineChart: React.FC<LineChartProps> = ({
           )}
           
           {onToggleFullscreen && (
-            <Tooltip title="Tela cheia">
+            <Tooltip title="Tela cheia" arrow>
               <IconButton 
                 size="small" 
                 onClick={onToggleFullscreen}
@@ -433,6 +464,7 @@ const LineChart: React.FC<LineChartProps> = ({
               borderRadius: 2,
               mt: 1.5,
               minWidth: 180,
+              border: isDarkMode ? `1px solid ${alpha(theme.palette.divider, 0.1)}` : 'none',
               '& .MuiMenuItem-root': {
                 fontSize: '0.875rem',
                 py: 1,
@@ -481,8 +513,8 @@ const LineChart: React.FC<LineChartProps> = ({
           data={data}
           margin={{ 
             top: 20, 
-            right: showLegend ? 120 : 30, 
-            bottom: 40, 
+            right: showLegend ? 150 : 30, // Aumentamos o espaço para a legenda
+            bottom: 50, // Aumentamos para dar mais espaço aos rótulos 
             left: 60 
           }}
           xScale={{ type: 'point' }}
@@ -499,25 +531,72 @@ const LineChart: React.FC<LineChartProps> = ({
           axisRight={null}
           axisBottom={{
             tickSize: 5,
-            tickPadding: 8,
-            tickRotation: 0,
+            tickPadding: 10, // Aumentado o espaçamento
+            tickRotation: isMobile ? -45 : 0, // Girar em dispositivos móveis
             legend: '',
-            legendOffset: 35,
+            legendOffset: 40, // Aumentado o offset para afastar o título
+            renderTick: (tick) => {
+              // Personalização de ticks para melhorar a legibilidade
+              return (
+                <g transform={`translate(${tick.x},${tick.y})`}>
+                  <line stroke={theme.palette.divider} strokeWidth={1} y1={0} y2={5} />
+                  <text
+                    textAnchor="middle"
+                    dominantBaseline="text-before-edge"
+                    style={{
+                      fill: chartColors.tickLabels,
+                      fontSize: 11,
+                      fontFamily: theme.typography.fontFamily,
+                      fontWeight: 500
+                    }}
+                    y={10}
+                  >
+                    {tick.value}
+                  </text>
+                </g>
+              );
+            }
           }}
           axisLeft={{
             tickSize: 5,
             tickPadding: 12,
             tickRotation: 0,
             legend: '',
-            legendOffset: -40,
+            legendOffset: -45, // Aumentado para afastar do eixo
             format: value => {
               if (value >= 1000000) return `${(value/1000000).toFixed(1)}M`;
               if (value >= 1000) return `${(value/1000).toFixed(0)}K`;
               return value;
             },
+            renderTick: (tick) => {
+              // Personalização de ticks para melhorar a legibilidade
+              return (
+                <g transform={`translate(${tick.x},${tick.y})`}>
+                  <line stroke={theme.palette.divider} strokeWidth={1} x1={0} x2={-5} />
+                  <text
+                    textAnchor="end"
+                    dominantBaseline="middle"
+                    style={{
+                      fill: chartColors.tickLabels,
+                      fontSize: 11,
+                      fontFamily: theme.typography.fontFamily,
+                      fontWeight: 500
+                    }}
+                    x={-12}
+                  >
+                    {tick.value >= 1000000
+                      ? `${(tick.value/1000000).toFixed(1)}M`
+                      : tick.value >= 1000
+                      ? `${(tick.value/1000).toFixed(0)}K`
+                      : tick.value}
+                  </text>
+                </g>
+              );
+            }
           }}
           enableGridX={enableGridX}
           enableGridY={enableGridY}
+          gridYValues={5} // Especificamos o número de linhas da grade 
           pointSize={enablePoints ? 8 : 0}
           pointColor={{ theme: 'background' }}
           pointBorderWidth={2}
@@ -527,21 +606,21 @@ const LineChart: React.FC<LineChartProps> = ({
           areaBaselineValue={0}
           areaOpacity={0.15}
           enableSlices="x"
-          crosshairType="x"
+          crosshairType="cross" // Alterado para cross para melhor visualização
           lineWidth={lineWidth}
           legends={showLegend ? [
             {
               anchor: 'right',
               direction: 'column',
               justify: false,
-              translateX: 100,
+              translateX: 120,
               translateY: 0,
-              itemsSpacing: 10,
+              itemsSpacing: 12, // Aumentado o espaçamento entre itens
               itemDirection: 'left-to-right',
               itemWidth: 100,
-              itemHeight: 18,
+              itemHeight: 20, // Aumentado a altura para melhor clicabilidade
               itemOpacity: 0.85,
-              symbolSize: 10,
+              symbolSize: 12, // Aumentado o tamanho do símbolo
               symbolShape: 'circle',
               symbolBorderColor: 'rgba(0, 0, 0, .5)',
               effects: [
@@ -549,7 +628,8 @@ const LineChart: React.FC<LineChartProps> = ({
                   on: 'hover',
                   style: {
                     itemBackground: alpha(theme.palette.background.paper, 0.7),
-                    itemOpacity: 1
+                    itemOpacity: 1,
+                    symbolSize: 14 // Aumentar no hover
                   }
                 }
               ]
@@ -561,8 +641,8 @@ const LineChart: React.FC<LineChartProps> = ({
           animate={true}
           motionConfig={{
             mass: 1, 
-            tension: 170, 
-            friction: 26, 
+            tension: 150, // Ajustado para animação mais suave
+            friction: 30, // Ajustado para animação mais suave 
             clamp: false, 
             precision: 0.01, 
             velocity: 0
@@ -570,21 +650,23 @@ const LineChart: React.FC<LineChartProps> = ({
           tooltip={({ point }) => (
             <Box
               sx={{
-                p: 1.5,
+                p: 1.8, // Aumentado o padding
                 bgcolor: chartColors.tooltip,
                 border: `1px solid ${chartColors.tooltipBorder}`,
                 borderRadius: 2,
-                boxShadow: theme.shadows[3],
-                maxWidth: 180,
+                boxShadow: isDarkMode 
+                  ? '0 4px 20px rgba(0,0,0,0.25)' 
+                  : '0 4px 20px rgba(0,0,0,0.15)',
+                maxWidth: 200, // Aumentado a largura máxima
                 backdropFilter: 'blur(8px)',
               }}
             >
               <Typography
                 sx={{ 
                   color: point.seriesColor,
-                  fontSize: '0.875rem',
+                  fontSize: '0.9rem', // Aumentado
                   fontWeight: 600,
-                  mb: 0.5,
+                  mb: 0.8, // Aumentado
                   display: 'flex',
                   alignItems: 'center',
                   gap: 0.8
@@ -592,25 +674,36 @@ const LineChart: React.FC<LineChartProps> = ({
               >
                 <Box
                   sx={{
-                    width: 10,
-                    height: 10,
+                    width: 12, // Aumentado
+                    height: 12, // Aumentado
                     borderRadius: '50%',
                     bgcolor: point.seriesColor,
+                    boxShadow: isDarkMode 
+                      ? `0 0 5px ${alpha(point.seriesColor, 0.5)}` 
+                      : 'none' // Efeito de brilho em modo escuro
                   }}
                 />
                 {point.seriesId}
               </Typography>
               
-              <Box sx={{ display: 'flex', flexDirection: 'column', mt: 0.5 }}>
-                <Typography variant="caption" color="text.secondary">
+              <Box sx={{ display: 'flex', flexDirection: 'column', mt: 0.8 }}>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: theme.palette.text.secondary,
+                    fontSize: '0.8rem', // Aumentado
+                    fontWeight: 500 // Aumentado
+                  }}
+                >
                   {point.data.xFormatted || point.data.x}
                 </Typography>
                 <Typography
                   sx={{
                     color: theme.palette.text.primary,
-                    fontSize: '0.875rem',
+                    fontSize: '1rem', // Aumentado
                     fontWeight: 600,
-                    mt: 0.5
+                    mt: 0.5,
+                    textShadow: isDarkMode ? '0 0 1px rgba(255,255,255,0.2)' : 'none'
                   }}
                 >
                   {point.data.formattedY || formatNumber(point.data.y)}
@@ -619,12 +712,13 @@ const LineChart: React.FC<LineChartProps> = ({
                   <Typography
                     sx={{
                       color: point.data.percentage > 0 ? colorPalettes.green.main : colorPalettes.amber.dark,
-                      fontSize: '0.75rem',
+                      fontSize: '0.825rem', // Aumentado
                       fontWeight: 600,
-                      mt: 0.5,
+                      mt: 0.8, // Aumentado
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 0.5
+                      gap: 0.5,
+                      textShadow: isDarkMode ? '0 0 1px rgba(0,0,0,0.3)' : 'none'
                     }}
                   >
                     {point.data.percentage > 0 ? '+' : ''}{point.data.percentage.toFixed(1)}%
@@ -633,6 +727,28 @@ const LineChart: React.FC<LineChartProps> = ({
               </Box>
             </Box>
           )}
+          // Sombra nas linhas para maior destaque
+          defs={[
+            {
+              id: 'line-gradient',
+              type: 'linearGradient',
+              colors: [
+                { offset: 0, color: isDarkMode ? alpha(theme.palette.primary.main, 0.2) : alpha(theme.palette.primary.main, 0.1) },
+                { offset: 100, color: isDarkMode ? 'rgba(0, 0, 0, 0)' : 'rgba(255, 255, 255, 0)' }
+              ]
+            }
+          ]}
+          // Adiciona sombras às linhas para maior destaque em tema escuro
+          layers={[
+            'grid',
+            'axes',
+            'crosshair',
+            'lines',
+            'points',
+            'slices',
+            'mesh',
+            'legends',
+          ]}
         />
       </Box>
     </Paper>

@@ -39,7 +39,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const statsCards = useMemo(() => [
     {
       id: 'facebook',
-      title: "Facebook Followers",
+      title: "Seguidores do Facebook",
       value: networkData.facebook?.followers.toLocaleString() ?? '0',
       change: networkData.facebook?.engagement ?? 0,
       icon: <Facebook sx={{ fontSize: 32, color: '#1877F2' }} />,
@@ -47,7 +47,7 @@ const Dashboard: React.FC<DashboardProps> = ({
     },
     {
       id: 'twitter',
-      title: "Twitter Followers",
+      title: "Seguidores do Twitter",
       value: networkData.twitter?.followers.toLocaleString() ?? '0',
       change: networkData.twitter?.engagement ?? 0,
       icon: <Twitter sx={{ fontSize: 32, color: '#1DA1F2' }} />,
@@ -55,7 +55,7 @@ const Dashboard: React.FC<DashboardProps> = ({
     },
     {
       id: 'instagram',
-      title: "Instagram Followers",
+      title: "Seguidores do Instagram",
       value: networkData.instagram?.followers.toLocaleString() ?? '0',
       change: networkData.instagram?.engagement ?? 0,
       icon: <Instagram sx={{ fontSize: 32, color: '#E4405F' }} />,
@@ -63,7 +63,7 @@ const Dashboard: React.FC<DashboardProps> = ({
     },
     {
       id: 'linkedin',
-      title: "LinkedIn Followers",
+      title: "Seguidores do LinkedIn",
       value: networkData.linkedin?.followers.toLocaleString() ?? '0',
       change: networkData.linkedin?.engagement ?? 0,
       icon: <LinkedIn sx={{ fontSize: 32, color: '#0A66C2' }} />,
@@ -152,7 +152,7 @@ const Dashboard: React.FC<DashboardProps> = ({
               fontSize: { xs: '1.5rem', sm: '2rem' }
             }}
           >
-            Dashboard Overview
+            Visão Geral do Dashboard
           </Typography>
           <DateRangeFilter 
             value={dateRangeType} 

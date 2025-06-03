@@ -11,7 +11,10 @@ import {
   Typography,
   Tooltip,
   useMediaQuery,
-  alpha, // Adicionar importação do alpha aqui
+  alpha,
+  Box,
+  Divider,
+  Badge
 } from '@mui/material';
 import {
   Dashboard,
@@ -23,9 +26,11 @@ import {
   Settings,
   Menu as MenuIcon,
   Close as CloseIcon,
+  ChevronRight,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { getSidebarStyles, DRAWER_WIDTH } from './styles';
+import { routes } from '../../config/routes';
 
 interface MenuItem {
   id: string;
@@ -33,6 +38,8 @@ interface MenuItem {
   icon: React.ReactElement;
   path: string;
   section?: string;
+  badge?: number;
+  isDivider?: boolean;
 }
 
 interface SidebarProps {
@@ -54,14 +61,16 @@ const menuItems: MenuItem[] = [
     text: 'Agendar Posts', 
     icon: <Schedule />, 
     path: '/schedule',
-    section: 'Principal'
+    section: 'Principal',
+    badge: 2
   },
   { 
     id: 'monitoring', 
     text: 'Monitoramento', 
     icon: <Notifications />, 
     path: '/monitoring',
-    section: 'Principal'
+    section: 'Principal',
+    badge: 3
   },
   { 
     id: 'analytics', 
@@ -98,6 +107,12 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, currentPath = '/' }) 
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const styles = getSidebarStyles(theme);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Verificar se a rota é válida
+  const isValidRoute = (path: string) => {
+    return routes.some(route => route.path === path);
+  };
 
   // Agrupa os itens do menu por seção
   const menuSections = menuItems.reduce((acc, item) => {
@@ -135,17 +150,27 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, currentPath = '/' }) 
         variant={drawerVariant}
         open={open}
         onClose={isMobile ? onToggle : undefined}
-        sx={styles.drawer}
+        sx={{
+          ...styles.drawer,
+          '& .MuiDrawer-paper': {
+            ...styles.drawer['& .MuiDrawer-paper'],
+            boxShadow: theme.palette.mode === 'dark' 
+              ? 'none' 
+              : '0 0 20px rgba(0, 0, 0, 0.05)',
+          }
+        }}
       >
         {/* Header da Sidebar */}
-        <div style={{
-          height: '70px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 24px',
-          borderBottom: `1px solid ${theme.palette.divider}`
-        }}>
+        <Box
+          sx={{
+            height: '70px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0 24px',
+            borderBottom: `1px solid ${theme.palette.divider}`,
+          }}
+        >
           <Typography 
             variant="h6" 
             sx={{
@@ -167,22 +192,27 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, currentPath = '/' }) 
                 color: theme.palette.primary.main,
                 transform: 'rotate(90deg)',
               },
-              transition: 'all 0.2s'
+              transition: 'all 0.3s'
             }}
           >
             <CloseIcon />
           </IconButton>
-        </div>
+        </Box>
 
         {/* Lista de Menu */}
-        <div style={{ overflow: 'auto', paddingBottom: '16px' }}>
+        <Box sx={{ overflow: 'auto', paddingBottom: '16px', flexGrow: 1 }}>
           {Object.entries(menuSections).map(([section, items]) => (
             <React.Fragment key={section}>
-              <div style={{
-                marginTop: '24px',
-                marginBottom: '8px',
-                padding: '0 24px'
-              }}>
+              <Box 
+                sx={{
+                  marginTop: '24px',
+                  marginBottom: '8px',
+                  padding: '0 24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}
+              >
                 <Typography 
                   variant="overline"
                   sx={{
@@ -196,10 +226,23 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, currentPath = '/' }) 
                 >
                   {section}
                 </Typography>
-              </div>
+                <Divider 
+                  sx={{ 
+                    flexGrow: 1, 
+                    ml: 1, 
+                    borderColor: alpha(theme.palette.divider, 0.5)
+                  }} 
+                />
+              </Box>
               <List sx={{ padding: '0 16px' }}>
                 {items.map((item) => {
                   const isSelected = currentPath === item.path;
+                  const isRouteImplemented = isValidRoute(item.path);
+                  
+                  if (item.isDivider) {
+                    return <Divider key={item.id} sx={{ my: 1.5 }} />;
+                  }
+                  
                   return (
                     <ListItem key={item.id} disablePadding sx={{ mb: 0.5 }}>
                       <ListItemButton
@@ -208,10 +251,13 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, currentPath = '/' }) 
                         sx={{
                           borderRadius: '10px',
                           padding: '10px 16px',
-                          color: isSelected ? theme.palette.primary.main : theme.palette.text.secondary,
+                          color: isSelected 
+                            ? theme.palette.primary.main 
+                            : theme.palette.text.secondary,
                           position: 'relative',
+                          overflow: 'hidden', // Para o efeito de ripple ficar contido
                           '&.Mui-selected': {
-                            backgroundColor: `${theme.palette.primary.main}14`,
+                            backgroundColor: alpha(theme.palette.primary.main, 0.08),
                             '&::before': {
                               content: '""',
                               position: 'absolute',
@@ -221,14 +267,21 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, currentPath = '/' }) 
                               width: '4px',
                               borderRadius: '0 4px 4px 0',
                               background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.primary.light} 90%)`,
+                              boxShadow: theme.palette.mode === 'dark' 
+                                ? `0 0 8px ${alpha(theme.palette.primary.main, 0.6)}` 
+                                : 'none',
                             },
                           },
                           '&:hover': {
-                            backgroundColor: `${theme.palette.primary.main}0A`,
+                            backgroundColor: alpha(theme.palette.primary.main, 0.04),
                             color: theme.palette.primary.main,
                             transform: 'translateX(4px)',
                           },
                           transition: 'all 0.2s',
+                          // Estilo para rotas não implementadas
+                          ...(isRouteImplemented ? {} : {
+                            opacity: theme.palette.mode === 'dark' ? 0.7 : 0.8,
+                          }),
                         }}
                       >
                         <ListItemIcon sx={{
@@ -240,7 +293,21 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, currentPath = '/' }) 
                             transform: isSelected ? 'scale(1.1)' : 'scale(1)',
                           },
                         }}>
-                          {item.icon}
+                          {item.badge ? (
+                            <Badge 
+                              badgeContent={item.badge} 
+                              color="error"
+                              sx={{
+                                '& .MuiBadge-badge': {
+                                  fontSize: '0.65rem',
+                                  minWidth: '18px',
+                                  height: '18px',
+                                }
+                              }}
+                            >
+                              {item.icon}
+                            </Badge>
+                          ) : item.icon}
                         </ListItemIcon>
                         <ListItemText 
                           primary={item.text}
@@ -249,6 +316,27 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, currentPath = '/' }) 
                             fontWeight: isSelected ? 600 : 500,
                           }}
                         />
+                        
+                        {/* Indicador para páginas em desenvolvimento */}
+                        {!isRouteImplemented && (
+                          <Box 
+                            sx={{
+                              bgcolor: alpha(theme.palette.warning.main, 0.1),
+                              color: theme.palette.warning.main,
+                              fontSize: '0.65rem',
+                              py: 0.3,
+                              px: 0.8,
+                              borderRadius: '4px',
+                              fontWeight: 600,
+                              letterSpacing: '0.5px',
+                              border: `1px solid ${alpha(theme.palette.warning.main, 0.2)}`,
+                              display: 'flex',
+                              alignItems: 'center'
+                            }}
+                          >
+                            Em breve
+                          </Box>
+                        )}
                       </ListItemButton>
                     </ListItem>
                   );
@@ -256,7 +344,29 @@ const Sidebar: React.FC<SidebarProps> = ({ open, onToggle, currentPath = '/' }) 
               </List>
             </React.Fragment>
           ))}
-        </div>
+        </Box>
+        
+        {/* Footer com versão */}
+        <Box
+          sx={{
+            padding: '16px 24px',
+            borderTop: `1px solid ${alpha(theme.palette.divider, 0.5)}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{
+              color: alpha(theme.palette.text.secondary, 0.6),
+              fontSize: '0.7rem',
+              fontWeight: 500,
+            }}
+          >
+            v1.2.0 © 2025 Social Media
+          </Typography>
+        </Box>
       </Drawer>
     </>
   );

@@ -19,13 +19,10 @@ import {
   MoreVert, 
   GetApp, 
   Fullscreen, 
-  FilterList,
-  Share as ShareIcon,
-  Favorite,
-  Comment
+  FilterList
 } from '@mui/icons-material';
 import { formatNumber } from '../../utils/formatters';
-import { socialColors } from '../../theme/constants/colors';
+import { socialColors, colorPalettes } from '../../theme/constants/colors';
 
 // Definimos a interface para os dados de engajamento
 export interface EngagementData {
@@ -45,6 +42,16 @@ interface NetworkEngagementChartProps {
   onDownload?: () => void;
   onToggleFullscreen?: () => void;
 }
+
+// Interface estendida para dados de barras do Nivo
+type BarItem = {
+  data: EngagementData;
+  id?: string | number;
+  value: number;
+  index: number;
+  indexValue: string;
+  color: string;
+};
 
 const NetworkEngagementChart: React.FC<NetworkEngagementChartProps> = ({ 
   data, 
@@ -79,12 +86,12 @@ const NetworkEngagementChart: React.FC<NetworkEngagementChartProps> = ({
     }
   };
 
-  // Cores para cada tipo de engajamento
+  // Cores para cada tipo de engajamento usando a paleta do projeto
   const engagementColors = useMemo(() => ({
-    likes: theme.palette.primary.main,
-    comments: theme.palette.secondary.main,
-    shares: theme.palette.success.main
-  }), [theme]);
+    likes: colorPalettes.blue.main,
+    comments: colorPalettes.purple.main,
+    shares: colorPalettes.green.main
+  }), []);
 
   // Labels amigáveis para os tipos de engajamento
   const engagementLabels = {
@@ -195,26 +202,26 @@ const NetworkEngagementChart: React.FC<NetworkEngagementChartProps> = ({
       <Paper 
         elevation={isDarkMode ? 0 : 1}
         sx={{ 
-          p: 3, 
+          p: 2.5,
           height, 
           bgcolor: theme.palette.background.paper,
           borderRadius: 2,
           border: isDarkMode ? `1px solid ${alpha(theme.palette.divider, 0.1)}` : 'none',
         }}
       >
-        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Skeleton variant="text" width={200} height={32} sx={{ 
-            bgcolor: isDarkMode ? alpha(theme.palette.divider, 0.1) : alpha(theme.palette.divider, 0.2)
+        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Skeleton variant="text" width={200} height={28} sx={{ 
+            bgcolor: isDarkMode ? alpha(theme.palette.divider, 0.1) : alpha(theme.palette.divider, 0.1)
           }} />
-          <Skeleton variant="circular" width={40} height={40} sx={{ 
-            bgcolor: isDarkMode ? alpha(theme.palette.divider, 0.1) : alpha(theme.palette.divider, 0.2)
+          <Skeleton variant="circular" width={32} height={32} sx={{ 
+            bgcolor: isDarkMode ? alpha(theme.palette.divider, 0.1) : alpha(theme.palette.divider, 0.1)
           }} />
         </Box>
         <Skeleton 
           variant="rectangular" 
-          height={height - 100} 
+          height={height - 80}
           sx={{ 
-            bgcolor: isDarkMode ? alpha(theme.palette.divider, 0.1) : alpha(theme.palette.divider, 0.2),
+            bgcolor: isDarkMode ? alpha(theme.palette.divider, 0.1) : alpha(theme.palette.divider, 0.1),
             borderRadius: 1
           }} 
         />
@@ -226,14 +233,15 @@ const NetworkEngagementChart: React.FC<NetworkEngagementChartProps> = ({
     <Paper 
       elevation={isDarkMode ? 0 : 1}
       sx={{ 
-        p: 3, 
+        p: 2.5,
         height,
         bgcolor: theme.palette.background.paper,
         position: 'relative',
-        overflow: 'hidden',
         borderRadius: 2,
         border: isDarkMode ? `1px solid ${alpha(theme.palette.divider, 0.1)}` : 'none',
         transition: 'all 0.3s ease',
+        overflowX: 'hidden',
+        overflowY: 'hidden',
         '&:hover': {
           boxShadow: isDarkMode ? `0 4px 20px ${alpha('#000', 0.1)}` : theme.shadows[3],
         },
@@ -245,9 +253,10 @@ const NetworkEngagementChart: React.FC<NetworkEngagementChartProps> = ({
           right: 0,
           height: '4px',
           background: `linear-gradient(90deg, 
-            ${theme.palette.primary.main} 0%, 
-            ${theme.palette.primary.light} 100%)`,
-          opacity: 0.8
+            ${colorPalettes.blue.main} 0%, 
+            ${colorPalettes.blue.light} 100%)`,
+          opacity: 0.8,
+          borderRadius: '8px 8px 0 0',
         }
       }}
     >
@@ -255,9 +264,11 @@ const NetworkEngagementChart: React.FC<NetworkEngagementChartProps> = ({
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
-        mb: 3,
+        mb: 2,
         flexWrap: isMobile ? 'wrap' : 'nowrap',
-        gap: isMobile ? 2 : 0
+        gap: isMobile ? 2 : 0,
+        position: 'relative',
+        zIndex: 1,
       }}>
         <Typography 
           variant="h6" 
@@ -266,14 +277,15 @@ const NetworkEngagementChart: React.FC<NetworkEngagementChartProps> = ({
             color: theme.palette.text.primary,
             display: 'flex',
             alignItems: 'center',
-            gap: 1
+            gap: 1,
+            fontSize: '1rem',
           }}
         >
-          <FilterList sx={{ color: theme.palette.primary.main }} />
+          <FilterList sx={{ color: colorPalettes.blue.main }} />
           {title}
         </Typography>
         
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
           <ToggleButtonGroup
             value={viewMode}
             exclusive
@@ -290,10 +302,10 @@ const NetworkEngagementChart: React.FC<NetworkEngagementChartProps> = ({
                 textTransform: 'none',
                 borderColor: alpha(theme.palette.divider, 0.1),
                 '&.Mui-selected': {
-                  bgcolor: alpha(theme.palette.primary.main, isDarkMode ? 0.2 : 0.1),
-                  color: theme.palette.primary.main,
+                  bgcolor: alpha(colorPalettes.blue.main, isDarkMode ? 0.2 : 0.1),
+                  color: colorPalettes.blue.main,
                   '&:hover': {
-                    bgcolor: alpha(theme.palette.primary.main, isDarkMode ? 0.25 : 0.15),
+                    bgcolor: alpha(colorPalettes.blue.main, isDarkMode ? 0.25 : 0.15),
                   }
                 }
               }
@@ -315,8 +327,8 @@ const NetworkEngagementChart: React.FC<NetworkEngagementChartProps> = ({
                 sx={{ 
                   color: theme.palette.text.secondary,
                   '&:hover': {
-                    color: theme.palette.primary.main,
-                    bgcolor: alpha(theme.palette.primary.main, 0.08),
+                    color: colorPalettes.blue.main,
+                    bgcolor: alpha(colorPalettes.blue.main, 0.1),
                   }
                 }}
               >
@@ -333,8 +345,8 @@ const NetworkEngagementChart: React.FC<NetworkEngagementChartProps> = ({
                 sx={{ 
                   color: theme.palette.text.secondary,
                   '&:hover': {
-                    color: theme.palette.primary.main,
-                    bgcolor: alpha(theme.palette.primary.main, 0.08),
+                    color: colorPalettes.blue.main,
+                    bgcolor: alpha(colorPalettes.blue.main, 0.1),
                   }
                 }}
               >
@@ -350,8 +362,8 @@ const NetworkEngagementChart: React.FC<NetworkEngagementChartProps> = ({
             sx={{ 
               color: theme.palette.text.secondary,
               '&:hover': {
-                color: theme.palette.primary.main,
-                bgcolor: alpha(theme.palette.primary.main, 0.08),
+                color: colorPalettes.blue.main,
+                bgcolor: alpha(colorPalettes.blue.main, 0.1),
               }
             }}
           >
@@ -365,7 +377,7 @@ const NetworkEngagementChart: React.FC<NetworkEngagementChartProps> = ({
           open={open}
           onClose={handleClose}
           PaperProps={{
-            elevation: isDarkMode ? 3 : 6,
+            elevation: 3,
             sx: {
               overflow: 'visible',
               filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.15))',
@@ -403,61 +415,53 @@ const NetworkEngagementChart: React.FC<NetworkEngagementChartProps> = ({
         </Menu>
       </Box>
       
-      <Box sx={{ height: height - 100, width: '100%' }}>
+      {/* Container do gráfico */}
+      <Box sx={{ 
+        height: `calc(${height - 70}px)`,
+        width: '100%',
+        position: 'relative',
+      }}>
         <ResponsiveBar
           data={data}
           keys={['likes', 'comments', 'shares']}
           indexBy="network"
           margin={{ 
             top: 20, 
-            right: showLegend ? 150 : 30, 
-            bottom: 60, 
+            right: showLegend ? 150 : 30,
+            bottom: 40, 
             left: 60 
           }}
           padding={0.3}
+          innerPadding={isMobile ? 1 : 2}
           groupMode={viewMode}
-          valueScale={{ type: 'linear' }}
+          valueScale={{ type: 'linear', nice: true }}
           indexScale={{ type: 'band', round: true }}
-          // Usando any para evitar erros de tipo
-          colors={(bar: any) => {
-            if (!bar || !bar.id) return theme.palette.primary.main;
-            const key = String(bar.id);
-            return engagementColors[key as keyof typeof engagementColors] || theme.palette.primary.main;
+          // @ts-ignore - A tipagem está errada, mas o código funciona
+          colors={(bar) => {
+            // @ts-ignore - Biblioteca espera `id` mesmo que TypeScript não reconheça
+            if (!bar || !bar.id) return colorPalettes.blue.main;
+            // @ts-ignore
+            return engagementColors[bar.id as keyof typeof engagementColors] || colorPalettes.blue.main;
           }}
-          borderRadius={4}
-          // Usando any para evitar erros de tipo
-          borderColor={(bar: any) => {
-            if (!bar || !bar.id) return alpha(theme.palette.primary.main, 0.4);
-            const key = String(bar.id);
-            const color = engagementColors[key as keyof typeof engagementColors] || theme.palette.primary.main;
+          borderRadius={3}
+          borderWidth={1}
+          // @ts-ignore - A tipagem está errada, mas o código funciona
+          borderColor={(bar) => {
+            // @ts-ignore - Biblioteca espera `id` mesmo que TypeScript não reconheça
+            if (!bar || !bar.id) return alpha(colorPalettes.blue.main, 0.4);
+            // @ts-ignore
+            const color = engagementColors[bar.id as keyof typeof engagementColors] || colorPalettes.blue.main;
             return isDarkMode ? alpha(color, 0.4) : alpha(color, 0.8);
           }}
-          borderWidth={1}
+          enableGridY={true}
+          gridYValues={5}
           defs={[
-            {
-              id: 'dots',
-              type: 'patternDots',
-              background: 'inherit',
-              color: theme.palette.text.secondary,
-              size: 4,
-              padding: 1,
-              stagger: true
-            },
-            {
-              id: 'lines',
-              type: 'patternLines',
-              background: 'inherit',
-              color: theme.palette.text.secondary,
-              rotation: -45,
-              lineWidth: 6,
-              spacing: 10
-            },
             ...Object.entries(engagementColors).map(([key, color]) => ({
               id: `gradient-${key}`,
               type: 'linearGradient',
               colors: [
-                { offset: 0, color: alpha(color, isDarkMode ? 0.7 : 0.8) },
-                { offset: 100, color: alpha(color, isDarkMode ? 0.3 : 0.4) }
+                { offset: 0, color: alpha(color, isDarkMode ? 0.8 : 0.9) },
+                { offset: 100, color: alpha(color, isDarkMode ? 0.35 : 0.5) }
               ],
             }))
           ]}
@@ -472,41 +476,249 @@ const NetworkEngagementChart: React.FC<NetworkEngagementChartProps> = ({
             tickSize: 5,
             tickPadding: 8,
             tickRotation: 0,
-            legend: 'Redes Sociais',
+            legend: '',
             legendPosition: 'middle',
-            legendOffset: 40,
-            truncateTickAt: 0
+            legendOffset: 35,
+            truncateTickAt: 0,
           }}
           axisLeft={{
             tickSize: 5,
-            tickPadding: 8,
+            tickPadding: 12,
             tickRotation: 0,
-            legend: 'Engajamentos',
+            legend: '',
             legendPosition: 'middle',
-            legendOffset: -50,
-            format: (value) => formatNumber(value as number),
+            legendOffset: -40,
+            format: (value) => {
+              if (value >= 1000000) return `${(value/1000000).toFixed(1)}M`;
+              if (value >= 1000) return `${(value/1000).toFixed(0)}K`;
+              return value;
+            },
             truncateTickAt: 0
           }}
           enableGridX={false}
-          enableLabel={!isMobile}
+          enableLabel={!isMobile && viewMode !== 'grouped'}
           labelSkipWidth={32}
-          labelSkipHeight={12}
+          labelSkipHeight={16}
           labelTextColor={{
             from: 'color',
-            modifiers: [['darker', isDarkMode ? 2 : 3]],
+            modifiers: [['darker', isDarkMode ? 3 : 4]],
           }}
-          legends={showLegend ? [
+          theme={{
+            ...chartTheme,
+            grid: {
+              line: {
+                stroke: alpha(theme.palette.divider, isDarkMode ? 0.08 : 0.15),
+                strokeWidth: 1,
+                strokeDasharray: isDarkMode ? '3 3' : '2 4', 
+              },
+            },
+            axis: {
+              ...chartTheme.axis,
+              ticks: {
+                ...chartTheme.axis.ticks,
+                line: {
+                  stroke: alpha(theme.palette.divider, 0.4),
+                  strokeWidth: 1,
+                },
+              }
+            }
+          }}
+          animate={true}
+          motionConfig={{
+            mass: 1,
+            tension: 170,
+            friction: 26,
+            clamp: false,
+            precision: 0.01,
+            velocity: 0
+          }}
+          // @ts-ignore - A tipagem está errada, mas o código funciona
+          tooltip={({ id, value, color, indexValue, data: tooltipData }) => {
+            return (
+              <Box
+                sx={{
+                  p: 1.5,
+                  maxWidth: 180,
+                  bgcolor: isDarkMode 
+                    ? alpha(theme.palette.background.paper, 0.95) 
+                    : theme.palette.background.paper,
+                  borderRadius: 2,
+                  boxShadow: theme.shadows[3],
+                  border: `1px solid ${
+                    isDarkMode 
+                      ? alpha(theme.palette.divider, 0.2) 
+                      : alpha(theme.palette.primary.main, 0.1)
+                  }`,
+                  backdropFilter: 'blur(8px)',
+                }}
+              >
+                <Box
+                  sx={{ 
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.8,
+                    color: getSocialColor(String(indexValue)),
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    mb: 0.5
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      bgcolor: getSocialColor(String(indexValue)),
+                    }}
+                  />
+                  <Typography 
+                    component="span"
+                    sx={{ 
+                      color: 'inherit',
+                      fontSize: 'inherit',
+                      fontWeight: 'inherit'
+                    }}
+                  >
+                    {indexValue}
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ display: 'flex', flexDirection: 'column', mt: 0.5 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, mt: 0.5 }}>
+                    <Box 
+                      sx={{ 
+                        width: 10, 
+                        height: 10, 
+                        borderRadius: '50%', 
+                        bgcolor: color 
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        width: '100%',
+                        color: theme.palette.text.primary,
+                        fontSize: '0.875rem',
+                      }}
+                    >
+                      <Typography 
+                        component="span"
+                        sx={{
+                          fontWeight: 500,
+                          fontSize: 'inherit',
+                          color: 'inherit',
+                        }}
+                      >
+                        {engagementLabels[id as keyof typeof engagementLabels] || id}:
+                      </Typography>
+                      <Typography 
+                        component="span"
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: 'inherit',
+                          color: 'inherit',
+                        }}
+                      >
+                        {formatNumber(value)}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  
+                  {/* Apenas mostrar outros tipos de engajamento se for stacked */}
+                  {viewMode === 'stacked' && (
+                    <Box sx={{ mt: 1, pl: 2.5 }}>
+                      {Object.entries(engagementLabels)
+                        .filter(([key]) => key !== (id as string))
+                        .map(([key, label]) => (
+                          <Box 
+                            key={key}
+                            sx={{ 
+                              display: 'flex', 
+                              justifyContent: 'space-between', 
+                              width: '100%',
+                              color: alpha(theme.palette.text.secondary, 0.8),
+                              mb: 0.5,
+                              fontSize: '0.75rem'
+                            }}
+                          >
+                            <Typography 
+                              component="span"
+                              variant="caption"
+                              sx={{ color: 'inherit', fontSize: 'inherit' }}
+                            >
+                              {label}:
+                            </Typography>
+                            <Typography 
+                              component="span"
+                              variant="caption"
+                              sx={{ color: 'inherit', fontSize: 'inherit' }}
+                            >
+                              {formatNumber(tooltipData[key] as number)}
+                            </Typography>
+                          </Box>
+                        ))}
+                    </Box>
+                  )}
+                </Box>
+                
+                {/* Total para a rede */}
+                <Box sx={{ 
+                  mt: 1.5, 
+                  pt: 0.5,
+                  borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+                }}>
+                  <Box
+                    sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      fontWeight: 500,
+                      fontSize: '0.75rem',
+                    }}
+                  >
+                    <Typography 
+                      component="span" 
+                      variant="body2"
+                      sx={{ fontSize: 'inherit', fontWeight: 500 }}
+                    >
+                      Total:
+                    </Typography>
+                    <Typography 
+                      component="span" 
+                      variant="body2"
+                      sx={{ 
+                        fontSize: 'inherit', 
+                        fontWeight: 600,
+                        color: theme.palette.text.primary 
+                      }}
+                    >
+                      {formatNumber(getTotalEngagement(tooltipData))}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+            );
+          }}
+          role="application"
+          ariaLabel="Engajamento por rede social"
+          // @ts-ignore
+          barAriaLabel={e => {
+            // @ts-ignore
+            const label = engagementLabels[e.id as keyof typeof engagementLabels] || e.id;
+            return `${e.indexValue}: ${label}: ${e.value}`;
+          }}
+          legends={[
             {
               dataFrom: 'keys',
-              anchor: 'bottom-right',
+              anchor: 'right',
               direction: 'column',
               justify: false,
               translateX: 120,
               translateY: 0,
+              itemWidth: 100,
+              itemHeight: 20,
               itemsSpacing: 8,
               itemDirection: 'left-to-right',
-              itemWidth: 120,
-              itemHeight: 24,
               itemOpacity: 0.85,
               symbolSize: 12,
               symbolShape: 'circle',
@@ -520,85 +732,26 @@ const NetworkEngagementChart: React.FC<NetworkEngagementChartProps> = ({
                   }
                 }
               ],
-              itemTextColor: theme.palette.text.secondary
+              data: [
+                {
+                  id: 'likes',
+                  label: 'Curtidas',
+                  color: colorPalettes.blue.main
+                },
+                {
+                  id: 'comments',
+                  label: 'Comentários',
+                  color: colorPalettes.purple.main
+                },
+                {
+                  id: 'shares',
+                  label: 'Compartilhamentos',
+                  color: colorPalettes.green.main
+                }
+              ]
             }
-          ] : []}
-          theme={chartTheme}
-          animate={true}
-          motionConfig={{
-            mass: 1,
-            tension: 170,
-            friction: 26,
-            clamp: false,
-            precision: 0.01,
-            velocity: 0
-          }}
-          // Usando um tooltip mais simples para evitar problemas de tipo
-          tooltip={(props) => {
-            // Usando any para evitar problemas de tipo
-            const data = props.data as any;
-            const id = props.id as string;
-            const value = props.value as number;
-            const color = props.color as string;
-            const indexValue = props.indexValue as string;
-            
-            return (
-              <Box
-                sx={{
-                  p: 1.5,
-                  maxWidth: 200,
-                  bgcolor: 'background.paper',
-                  borderRadius: 1,
-                  boxShadow: 3
-                }}
-              >
-                <Box sx={{ mb: 1 }}>
-                  <Typography variant="subtitle2">
-                    {indexValue} - {engagementLabels[id as keyof typeof engagementLabels]}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {formatNumber(value)}
-                  </Typography>
-                </Box>
-              </Box>
-            );
-          }}
-          role="application"
-          ariaLabel="Engajamento por rede social"
-          barAriaLabel={e => `${e.indexValue}: ${e.id}: ${e.value}`}
+          ]}
         />
-      </Box>
-      
-      {/* Legenda de ícones */}
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          gap: 4, 
-          mt: 2,
-          flexWrap: 'wrap'
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-          <Favorite fontSize="small" sx={{ color: engagementColors.likes }} />
-          <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontWeight: 500 }}>
-            Curtidas
-          </Typography>
-        </Box>
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-          <Comment fontSize="small" sx={{ color: engagementColors.comments }} />
-          <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontWeight: 500 }}>
-            Comentários
-          </Typography>
-        </Box>
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-          <ShareIcon fontSize="small" sx={{ color: engagementColors.shares }} />
-          <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontWeight: 500 }}>
-            Compartilhamentos
-          </Typography>
-        </Box>
       </Box>
     </Paper>
   );

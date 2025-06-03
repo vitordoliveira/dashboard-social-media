@@ -83,7 +83,7 @@ const networkConfigs = {
 
 const TopPosts: React.FC<TopPostsProps> = ({ 
   posts, 
-  title = "Top Posts", 
+  title = "Melhores Posts", 
   maxPosts = 5,
   onViewAll,
   isLoading = false

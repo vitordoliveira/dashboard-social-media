@@ -20,8 +20,16 @@ interface BarChartProps {
   onViewTrend?: () => void;
 }
 
+// Labels amigáveis para os tipos de engajamento em português
+const engagementLabels = {
+  likes: "Curtidas",
+  comments: "Comentários",
+  shares: "Compartilhamentos"
+};
+
 const CustomTooltip = ({ id, value, color, indexValue }: BarTooltipProps<BarDatum>) => {
   const theme = useTheme();
+  const label = typeof id === 'string' ? (engagementLabels[id as keyof typeof engagementLabels] || id) : String(id);
   
   return (
     <Box
@@ -61,7 +69,7 @@ const CustomTooltip = ({ id, value, color, indexValue }: BarTooltipProps<BarDatu
           }}
         />
         <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          {String(id)}
+          {label}
         </Typography>
       </Box>
       <Typography
@@ -75,6 +83,13 @@ const CustomTooltip = ({ id, value, color, indexValue }: BarTooltipProps<BarDatu
     </Box>
   );
 };
+
+// Interface para o item de legenda
+interface LegendItem {
+  id: string;
+  color: string;
+  fill?: string;
+}
 
 const BarChart: React.FC<BarChartProps> = ({ 
   data, 
@@ -164,6 +179,40 @@ const BarChart: React.FC<BarChartProps> = ({
       </Paper>
     );
   }
+
+  // Renderiza a legenda traduzida
+  const renderLegend = (width: number, height: number, legendItems: LegendItem[]) => {
+    if (!showLegend) return null;
+    
+    return (
+      <g transform={`translate(${width - 120}, ${height / 2 - 50})`}>
+        {legendItems.map((item, i) => {
+          const label = engagementLabels[item.id as keyof typeof engagementLabels] || item.id;
+          
+          return (
+            <g key={i} transform={`translate(0, ${i * 25})`}>
+              <circle 
+                cx={6} 
+                cy={6} 
+                r={6} 
+                fill={item.color} 
+              />
+              <text 
+                x={20} 
+                y={9} 
+                style={{ 
+                  fill: theme.palette.text.secondary,
+                  fontSize: 11
+                }}
+              >
+                {label}
+              </text>
+            </g>
+          );
+        })}
+      </g>
+    );
+  };
 
   return (
     <Paper 
@@ -334,32 +383,6 @@ const BarChart: React.FC<BarChartProps> = ({
             from: 'color',
             modifiers: [['darker', 1.6]],
           }}
-          legends={showLegend ? [
-            {
-              dataFrom: 'keys',
-              anchor: 'bottom-right',
-              direction: 'column',
-              justify: false,
-              translateX: 120,
-              translateY: 0,
-              itemsSpacing: 2,
-              itemWidth: 100,
-              itemHeight: 20,
-              itemDirection: 'left-to-right',
-              itemOpacity: 0.85,
-              symbolSize: 12,
-              symbolShape: 'circle',
-              effects: [
-                {
-                  on: 'hover',
-                  style: {
-                    itemOpacity: 1,
-                    symbolSize: 14,
-                  }
-                }
-              ]
-            }
-          ] : []}
           theme={chartTheme}
           tooltip={CustomTooltip}
           animate={true}
@@ -371,6 +394,35 @@ const BarChart: React.FC<BarChartProps> = ({
             precision: 0.01,
             velocity: 0
           }}
+          layers={[
+            'grid',
+            'axes',
+            'bars',
+            'markers',
+            'annotations',
+            ({ bars }) => {
+              // Extrair as cores e IDs para a legenda
+              const legendItems: LegendItem[] = [];
+              if (bars && bars.length > 0) {
+                // Agrupar por ID e pegar apenas um representante de cada
+                const idSet = new Set<string>();
+                bars.forEach(bar => {
+                  if (bar.data.id && !idSet.has(bar.data.id as string)) {
+                    idSet.add(bar.data.id as string);
+                    legendItems.push({
+                      id: bar.data.id as string,
+                      color: bar.color
+                    });
+                  }
+                });
+              }
+
+              const width = bars && bars[0]?.width ? bars[0].width + bars[0].x + 130 : 500;
+              const height = bars && bars[0]?.height ? bars[0].height + 50 : 300;
+
+              return renderLegend(width, height, legendItems);
+            }
+          ]}
         />
       </Box>
     </Paper>

@@ -2,8 +2,6 @@
 
 A modern, responsive dashboard for social media analytics built with React, TypeScript, and Material-UI.
 
-![Dashboard Preview](https://via.placeholder.com/800x400?text=Dashboard+Preview)
-
 ![React](https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-4.x-3178C6?style=for-the-badge&logo=typescript)
 ![Material-UI](https://img.shields.io/badge/Material--UI-5.x-0081CB?style=for-the-badge&logo=mui)

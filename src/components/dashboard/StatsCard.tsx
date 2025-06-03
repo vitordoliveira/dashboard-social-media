@@ -1,8 +1,9 @@
-import React from 'react';
-import { Box, Card, Typography, alpha, useTheme, Tooltip, Skeleton } from '@mui/material';
+import React, { useMemo } from 'react';
+import { Box, Card, Typography, alpha, useTheme, Tooltip, Skeleton, useMediaQuery } from '@mui/material';
 import { TrendingUp, TrendingDown, InfoOutlined } from '@mui/icons-material';
 import { formatNumber, formatPercentage } from '../../utils/formatters';
 import { getGradient } from '../../utils/theme';
+import { colorPalettes, socialColors } from '../../theme/constants/colors';
 
 interface StatsCardProps {
   title: string;
@@ -14,9 +15,11 @@ interface StatsCardProps {
   isLoading?: boolean;
   tooltip?: string;
   period?: string;
+  social?: 'facebook' | 'twitter' | 'instagram' | 'linkedin' | 'youtube' | 'pinterest' | 'tiktok';
   additionalStats?: Array<{
     label: string;
     value: string | number;
+    change?: number;
   }>;
 }
 
@@ -25,39 +28,102 @@ const StatsCard: React.FC<StatsCardProps> = ({
   value,
   change,
   icon,
-  color = '#90caf9',
+  color,
   previousValue,
   isLoading = false,
   tooltip,
   period = 'vs último período',
+  social,
   additionalStats
 }) => {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isDarkMode = theme.palette.mode === 'dark';
+  
+  // Determinar a cor com base na propriedade social (se fornecida)
+  const cardColor = useMemo(() => {
+    if (social && socialColors[social]) {
+      return socialColors[social];
+    }
+    return color || theme.palette.primary.main;
+  }, [color, social, theme.palette.primary.main]);
+
   const formattedValue = typeof value === 'number' ? formatNumber(value) : value;
   const formattedChange = formatPercentage(change);
   const isPositive = change >= 0;
 
+  // Cores para variações positivas e negativas
+  const trendColors = {
+    positive: {
+      text: colorPalettes.green.main,
+      bg: alpha(colorPalettes.green.main, isDarkMode ? 0.15 : 0.1),
+    },
+    negative: {
+      text: colorPalettes.amber.dark,
+      bg: alpha(colorPalettes.amber.dark, isDarkMode ? 0.15 : 0.1),
+    }
+  };
+
   if (isLoading) {
     return (
       <Card
+        elevation={isDarkMode ? 0 : 2}
         sx={{
           p: 3,
-          background: getGradient(color),
-          border: 1,
-          borderColor: 'divider',
+          backgroundColor: theme.palette.background.paper,
+          borderRadius: 2,
+          border: isDarkMode ? `1px solid ${alpha(theme.palette.divider, 0.1)}` : 'none',
           position: 'relative',
           overflow: 'hidden',
           height: '100%'
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Skeleton variant="rectangular" width={48} height={48} sx={{ borderRadius: 2 }} />
-          <Skeleton variant="rectangular" width={80} height={24} sx={{ borderRadius: 1 }} />
+          <Skeleton 
+            variant="rectangular" 
+            width={48} 
+            height={48} 
+            sx={{ 
+              borderRadius: '12px',
+              bgcolor: isDarkMode ? alpha(theme.palette.divider, 0.1) : alpha(theme.palette.divider, 0.2)
+            }} 
+          />
+          <Skeleton 
+            variant="rectangular" 
+            width={80} 
+            height={28} 
+            sx={{ 
+              borderRadius: '6px',
+              bgcolor: isDarkMode ? alpha(theme.palette.divider, 0.1) : alpha(theme.palette.divider, 0.2)
+            }} 
+          />
         </Box>
-        <Skeleton variant="text" width="60%" height={40} sx={{ mb: 1 }} />
-        <Skeleton variant="text" width="40%" height={24} />
+        <Skeleton 
+          variant="text" 
+          width="60%" 
+          height={40}
+          sx={{ 
+            mb: 1,
+            bgcolor: isDarkMode ? alpha(theme.palette.divider, 0.1) : alpha(theme.palette.divider, 0.2)
+          }} 
+        />
+        <Skeleton 
+          variant="text" 
+          width="40%" 
+          height={24}
+          sx={{ 
+            bgcolor: isDarkMode ? alpha(theme.palette.divider, 0.1) : alpha(theme.palette.divider, 0.2)
+          }} 
+        />
         <Box sx={{ mt: 2, pt: 2, borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}` }}>
-          <Skeleton variant="text" width="80%" height={20} />
+          <Skeleton 
+            variant="text" 
+            width="80%" 
+            height={20}
+            sx={{ 
+              bgcolor: isDarkMode ? alpha(theme.palette.divider, 0.1) : alpha(theme.palette.divider, 0.2)
+            }} 
+          />
         </Box>
       </Card>
     );
@@ -65,19 +131,20 @@ const StatsCard: React.FC<StatsCardProps> = ({
 
   return (
     <Card
+      elevation={isDarkMode ? 0 : 2}
       sx={{
         p: 3,
-        background: getGradient(color),
-        border: 1,
-        borderColor: 'divider',
+        backgroundColor: theme.palette.background.paper,
+        borderRadius: 2,
+        border: isDarkMode ? `1px solid ${alpha(theme.palette.divider, 0.1)}` : 'none',
         position: 'relative',
         overflow: 'hidden',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
           transform: 'translateY(-4px)',
-          boxShadow: theme.shadows[8],
+          boxShadow: theme.shadows[isDarkMode ? 4 : 8],
           '& .icon-wrapper': {
-            transform: 'scale(1.1)'
+            transform: 'scale(1.05) rotate(-5deg)',
           }
         },
         '&::before': {
@@ -87,22 +154,15 @@ const StatsCard: React.FC<StatsCardProps> = ({
           left: 0,
           right: 0,
           height: '4px',
-          background: `linear-gradient(90deg, ${alpha(color, 0.6)} 0%, ${alpha(color, 0.2)} 100%)`
+          background: getGradient(cardColor, { start: 1, end: 0.2 }),
+          opacity: isDarkMode ? 0.8 : 1,
         },
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          top: '50%',
-          right: '-10%',
-          width: '200px',
-          height: '200px',
-          background: `radial-gradient(circle, ${alpha(color, 0.1)} 0%, transparent 70%)`,
-          transform: 'translateY(-50%)',
-          pointerEvents: 'none'
-        }
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      <Box sx={{ position: 'relative', zIndex: 1 }}>
+      <Box sx={{ position: 'relative', zIndex: 1, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
         <Box 
           sx={{ 
             display: 'flex', 
@@ -115,11 +175,14 @@ const StatsCard: React.FC<StatsCardProps> = ({
             className="icon-wrapper"
             sx={{ 
               p: 1.5,
-              borderRadius: 2,
-              bgcolor: alpha(color, 0.15),
+              borderRadius: '16px',
+              bgcolor: alpha(cardColor, isDarkMode ? 0.2 : 0.15),
               display: 'flex',
-              transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-              boxShadow: `0 4px 12px ${alpha(color, 0.15)}`
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+              boxShadow: `0 4px 12px ${alpha(cardColor, isDarkMode ? 0.25 : 0.2)}`,
+              color: cardColor
             }}
           >
             {icon}
@@ -134,17 +197,21 @@ const StatsCard: React.FC<StatsCardProps> = ({
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   gap: 0.5,
-                  background: alpha(
-                    isPositive ? theme.palette.success.main : theme.palette.error.main,
-                    0.1
-                  ),
-                  color: isPositive ? theme.palette.success.main : theme.palette.error.main,
-                  py: 0.5,
-                  px: 1,
-                  borderRadius: 1,
+                  background: isPositive ? trendColors.positive.bg : trendColors.negative.bg,
+                  color: isPositive ? trendColors.positive.text : trendColors.negative.text,
+                  py: 0.6,
+                  px: 1.2,
+                  borderRadius: '8px',
                   fontSize: '0.75rem',
-                  fontWeight: 'medium'
+                  fontWeight: 600,
+                  height: '28px',
+                  minWidth: '60px',
+                  boxShadow: `0 2px 6px ${alpha(
+                    isPositive ? trendColors.positive.text : trendColors.negative.text, 
+                    0.15
+                  )}`,
                 }}
               >
                 {isPositive ? (
@@ -161,7 +228,10 @@ const StatsCard: React.FC<StatsCardProps> = ({
                   sx={{ 
                     fontSize: 18, 
                     color: alpha(theme.palette.text.secondary, 0.7),
-                    cursor: 'help'
+                    cursor: 'help',
+                    '&:hover': {
+                      color: theme.palette.text.primary
+                    }
                   }} 
                 />
               </Tooltip>
@@ -172,12 +242,12 @@ const StatsCard: React.FC<StatsCardProps> = ({
         <Typography 
           variant="h4" 
           sx={{ 
-            mb: 1, 
-            fontWeight: 'bold',
-            background: `linear-gradient(45deg, ${theme.palette.text.primary} 30%, ${alpha(theme.palette.text.primary, 0.7)} 90%)`,
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            letterSpacing: '-0.5px'
+            mb: 0.5, 
+            fontWeight: 700,
+            fontSize: { xs: '1.5rem', md: '1.75rem' },
+            letterSpacing: '-0.5px',
+            color: theme.palette.text.primary,
+            lineHeight: 1.2
           }}
         >
           {formattedValue}
@@ -186,9 +256,10 @@ const StatsCard: React.FC<StatsCardProps> = ({
         <Typography
           variant="subtitle2"
           sx={{
-            color: alpha(theme.palette.text.secondary, 0.8),
-            fontWeight: 'medium',
-            fontSize: '0.875rem'
+            color: alpha(theme.palette.text.secondary, 0.9),
+            fontWeight: 500,
+            fontSize: '0.875rem',
+            mb: 'auto'
           }}
         >
           {title}
@@ -201,7 +272,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
               pt: 2,
               borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
+              gridTemplateColumns: `repeat(${Math.min(additionalStats.length, 3)}, 1fr)`,
               gap: 2
             }}
           >
@@ -212,26 +283,45 @@ const StatsCard: React.FC<StatsCardProps> = ({
                   sx={{
                     color: alpha(theme.palette.text.secondary, 0.7),
                     display: 'block',
-                    mb: 0.5
+                    mb: 0.5,
+                    fontSize: '0.7rem',
+                    textTransform: 'uppercase',
+                    fontWeight: 600,
+                    letterSpacing: '0.5px'
                   }}
                 >
                   {stat.label}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 'medium',
-                    color: theme.palette.text.primary
-                  }}
-                >
-                  {typeof stat.value === 'number' ? formatNumber(stat.value) : stat.value}
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.8 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 600,
+                      color: theme.palette.text.primary,
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    {typeof stat.value === 'number' ? formatNumber(stat.value) : stat.value}
+                  </Typography>
+                  {stat.change !== undefined && (
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontSize: '0.65rem',
+                        fontWeight: 700,
+                        color: stat.change >= 0 ? trendColors.positive.text : trendColors.negative.text,
+                      }}
+                    >
+                      {stat.change >= 0 ? '+' : ''}{formatPercentage(stat.change)}
+                    </Typography>
+                  )}
+                </Box>
               </Box>
             ))}
           </Box>
         )}
 
-        {(!additionalStats || additionalStats.length === 0) && (
+        {(!additionalStats || additionalStats.length === 0) && previousValue !== undefined && (
           <Box
             sx={{
               mt: 2,
@@ -239,14 +329,52 @@ const StatsCard: React.FC<StatsCardProps> = ({
               borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
               display: 'flex',
               alignItems: 'center',
-              gap: 1
+              justifyContent: 'space-between'
             }}
           >
             <Typography
               variant="caption"
               sx={{
                 color: alpha(theme.palette.text.secondary, 0.7),
-                fontSize: '0.75rem'
+                fontSize: '0.7rem',
+                textTransform: 'uppercase',
+                fontWeight: 600,
+                letterSpacing: '0.5px'
+              }}
+            >
+              Período anterior
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+                color: theme.palette.text.primary
+              }}
+            >
+              {formatNumber(previousValue)}
+            </Typography>
+          </Box>
+        )}
+
+        {(!additionalStats || additionalStats.length === 0) && previousValue === undefined && (
+          <Box
+            sx={{
+              mt: 2,
+              pt: 2,
+              borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+          >
+            <Typography
+              variant="caption"
+              sx={{
+                color: alpha(theme.palette.text.secondary, 0.7),
+                fontSize: '0.7rem',
+                textTransform: 'uppercase',
+                fontWeight: 600,
+                letterSpacing: '0.5px'
               }}
             >
               {period}

@@ -4,7 +4,7 @@ import { useLocation, Link as RouterLink } from 'react-router-dom';
 import { useThemeContext } from '../../context/ThemeContext';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import { getMainLayoutStyles, DRAWER_WIDTH } from './styles'; // Atualizado
+import { getMainLayoutStyles } from './styles';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -48,11 +48,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [pageTitle, setPageTitle] = useState('');
 
+  // Obtenha os estilos atualizados
   const styles = getMainLayoutStyles(theme, sidebarOpen);
 
   useEffect(() => {
     if (isSmallScreen) {
       setSidebarOpen(false);
+    } else {
+      // No desktop, mantenha a sidebar aberta por padrão
+      setSidebarOpen(true);
     }
   }, [isSmallScreen]);
 
@@ -73,17 +77,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const currentBreadcrumbs = routeMap[location.pathname] || [];
 
   return (
-    <Box sx={styles.root}>
-      {/* Sidebar */}
+    <Box sx={{ display: 'flex', minHeight: '100vh', overflow: 'hidden' }}>
       <Sidebar 
         open={sidebarOpen} 
         onToggle={handleDrawerToggle}
         currentPath={location.pathname}
       />
       
-      {/* Main content */}
-      <Box component="main" sx={styles.main}>
-        {/* Header */}
+      <Box 
+        component="main" 
+        sx={{
+          flexGrow: 1,
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'auto'
+        }}
+      >
         <Header 
           sidebarOpen={sidebarOpen}
           onSidebarToggle={handleDrawerToggle}
@@ -93,22 +103,20 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         />
 
         {/* Loading indicator */}
-        {isLoading && (
-          <LinearProgress sx={styles.loadingBar} />
-        )}
+        {isLoading && <LinearProgress sx={styles.loadingBar} />}
 
         {/* Breadcrumbs */}
         {themeSettings.showBreadcrumbs && (
           <Box sx={styles.breadcrumbsContainer}>
-            <Breadcrumbs aria-label="breadcrumb">
+            <Breadcrumbs aria-label="breadcrumb" separator="›">
               {currentBreadcrumbs.map((item, index) => {
                 const isLast = index === currentBreadcrumbs.length - 1;
                 return isLast ? (
                   <Typography 
                     key={item.path} 
                     color="text.primary"
-                    variant="body2"
-                    fontWeight="medium"
+                    fontWeight={600}
+                    fontSize="0.875rem"
                   >
                     {item.label}
                   </Typography>
@@ -118,7 +126,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     component={RouterLink}
                     to={item.path}
                     sx={styles.breadcrumbLink}
-                    variant="body2"
+                    underline="none"
                   >
                     {item.label}
                   </Link>
@@ -128,17 +136,30 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           </Box>
         )}
 
-        {/* Page content */}
-        <Box sx={styles.content}>
+        <Box sx={{
+          p: { xs: 2, sm: 3 },
+          flexGrow: 1,
+          background: theme.palette.background.default,
+          overflowX: 'hidden',
+        }}>
           {children}
         </Box>
       </Box>
 
-      {/* Overlay for small screens when sidebar is open */}
+      {/* Overlay for mobile when sidebar is open */}
       {isSmallScreen && sidebarOpen && (
         <Box
-          sx={styles.overlay}
           onClick={handleDrawerToggle}
+          sx={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            bgcolor: 'rgba(0,0,0,0.5)',
+            zIndex: theme.zIndex.drawer - 1,
+            backdropFilter: 'blur(4px)',
+          }}
         />
       )}
     </Box>

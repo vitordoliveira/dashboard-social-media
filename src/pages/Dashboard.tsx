@@ -4,7 +4,8 @@ import { Facebook, Twitter, Instagram, LinkedIn } from '@mui/icons-material';
 import { motion, AnimatePresence, domAnimation, LazyMotion } from 'framer-motion';
 import StatsCard from '../components/dashboard/StatsCard';
 import LineChart from '../components/charts/LineChart';
-import BarChart from '../components/charts/BarChart';
+// Importando o NetworkEngagementChart e sua interface
+import NetworkEngagementChart, { EngagementData } from '../components/charts/NetworkEngagementChart';
 import DateRangeFilter from '../components/dashboard/DateRangeFilter';
 import InsightCard from '../components/dashboard/InsightCard';
 import TopPosts from '../components/dashboard/TopPosts';
@@ -29,7 +30,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const { 
     networkData, 
     lineChartData, 
-    engagementData, 
+    engagementData, // Certifique-se que isso é do tipo EngagementData[]
     insights, 
     topPosts, 
     isLoading 
@@ -91,6 +92,31 @@ const Dashboard: React.FC<DashboardProps> = ({
       }
     }
   };
+
+  // Função para lidar com a exportação de dados, se necessário
+  const handleExportData = () => {
+    console.log("Exportando dados de engajamento...");
+    // Lógica de exportação aqui
+  };
+
+  // Função para lidar com o modo de tela cheia, se necessário
+  const handleFullscreen = () => {
+    console.log("Ativando modo tela cheia...");
+    // Lógica de tela cheia aqui
+  };
+
+  // Garantir que os dados de engajamento estejam no formato correto
+  const formattedEngagementData: EngagementData[] = useMemo(() => {
+    if (!engagementData || engagementData.length === 0) return [];
+    
+    // Se necessário, converta os dados para o formato correto
+    return engagementData.map(item => ({
+      network: String(item.network),
+      likes: Number(item.likes || 0),
+      comments: Number(item.comments || 0),
+      shares: Number(item.shares || 0)
+    }));
+  }, [engagementData]);
 
   return (
     <LazyMotion features={domAnimation}>
@@ -273,9 +299,15 @@ const Dashboard: React.FC<DashboardProps> = ({
                   title="Crescimento de Seguidores"
                 />
                 <Box sx={{ mt: 3 }}>
-                  <BarChart 
-                    data={engagementData}
+                  {/* Use os dados formatados */}
+                  <NetworkEngagementChart 
+                    data={formattedEngagementData}
                     title="Engajamento por Rede Social"
+                    showLegend={true}
+                    height={400}
+                    onDownload={handleExportData}
+                    onToggleFullscreen={handleFullscreen}
+                    isLoading={isLoading}
                   />
                 </Box>
               </Box>

@@ -11,7 +11,8 @@ import {
   Divider,
   Avatar,
   ListItemIcon,
-  useTheme
+  useTheme,
+  Tooltip
 } from '@mui/material';
 import { 
   Notifications, 
@@ -19,9 +20,9 @@ import {
   Logout,
   Person,
   Menu as MenuIcon,
-  ChevronRight,
+  KeyboardArrowDown,
 } from '@mui/icons-material';
-import { getHeaderStyles } from './styles'; // Atualizado
+import { getHeaderStyles } from './styles';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -42,9 +43,9 @@ const Header: React.FC<HeaderProps> = ({
   pageTitle = 'Dashboard',
   notificationsCount = 0,
   onSidebarToggle,
-  onLogout,
-  onProfileClick,
-  onSettingsClick,
+  onLogout = () => {},
+  onProfileClick = () => {},
+  onSettingsClick = () => {},
 }) => {
   const theme = useTheme();
   const styles = getHeaderStyles(theme);
@@ -69,14 +70,32 @@ const Header: React.FC<HeaderProps> = ({
     setNotificationAnchor(null);
   };
 
+  // Handlers combinados com fechamento de menu
+  const handleProfileClick = () => {
+    onProfileClick();
+    handleMenuClose();
+  };
+
+  const handleSettingsClick = () => {
+    onSettingsClick();
+    handleMenuClose();
+  };
+
+  const handleLogout = () => {
+    onLogout();
+    handleMenuClose();
+  };
+
   return (
-    <AppBar position="sticky" sx={styles.appBar}>
+    <AppBar position="sticky" elevation={0} sx={styles.appBar}>
       <Toolbar>
+        {/* Left side - Menu button and Title */}
         <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
           <IconButton
             onClick={onSidebarToggle}
             edge="start"
             sx={styles.menuButton}
+            aria-label="toggle sidebar"
           >
             <MenuIcon />
           </IconButton>
@@ -84,27 +103,45 @@ const Header: React.FC<HeaderProps> = ({
             <Typography variant="h6" sx={styles.headerTitle}>
               {pageTitle}
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography 
+              variant="caption" 
+              color="text.secondary"
+              sx={{ fontWeight: 500 }}
+            >
               {currentDate}
             </Typography>
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <IconButton 
-            sx={styles.actionButton}
-            onClick={handleNotificationOpen}
-          >
-            <Badge 
-              badgeContent={notificationsCount} 
-              sx={styles.notificationsBadge}
+        {/* Right side - Actions and user */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Tooltip title="Notificações">
+            <IconButton 
+              sx={styles.actionButton}
+              onClick={handleNotificationOpen}
+              aria-label="notifications"
             >
-              <Notifications />
-            </Badge>
-          </IconButton>
+              <Badge 
+                badgeContent={notificationsCount} 
+                sx={styles.notificationsBadge}
+              >
+                <Notifications />
+              </Badge>
+            </IconButton>
+          </Tooltip>
 
           <Box 
-            sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} 
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              cursor: 'pointer',
+              padding: '4px 8px',
+              borderRadius: '24px',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                bgcolor: 'rgba(255, 255, 255, 0.1)'
+              }
+            }} 
             onClick={handleMenuOpen}
           >
             <Avatar sx={styles.userAvatar}>
@@ -113,59 +150,60 @@ const Header: React.FC<HeaderProps> = ({
             <Typography variant="body2" sx={styles.userName}>
               {userName}
             </Typography>
-            <ChevronRight 
+            <KeyboardArrowDown 
               sx={{ 
-                transform: Boolean(anchorEl) ? 'rotate(90deg)' : 'none',
+                transform: Boolean(anchorEl) ? 'rotate(180deg)' : 'none',
                 transition: 'transform 0.2s',
                 color: 'text.secondary',
+                fontSize: 20
               }} 
             />
           </Box>
         </Box>
 
-        {/* Menu de Notificações */}
+        {/* Notification Menu */}
         <Menu
           anchorEl={notificationAnchor}
           open={Boolean(notificationAnchor)}
           onClose={handleNotificationClose}
           PaperProps={{ sx: styles.menuPaper }}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         >
           <Box sx={styles.notificationHeader}>
-            <Typography variant="subtitle1" fontWeight="medium">
+            <Typography variant="subtitle1" fontWeight="600">
               Notificações
             </Typography>
           </Box>
           <Box sx={styles.notificationContent}>
             {notificationsCount === 0 ? (
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="text.secondary" align="center">
                 Não há novas notificações
               </Typography>
             ) : (
-              <Typography variant="body2">
+              <Typography variant="body2" align="center">
                 Implementar lista de notificações
               </Typography>
             )}
           </Box>
         </Menu>
 
-        {/* Menu do Usuário */}
+        {/* User Menu */}
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
           PaperProps={{ sx: styles.userMenuPaper }}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         >
-          <MenuItem onClick={onProfileClick} sx={styles.menuItem}>
+          <MenuItem onClick={handleProfileClick} sx={styles.menuItem}>
             <ListItemIcon>
               <Person fontSize="small" />
             </ListItemIcon>
             <Typography variant="body2">Perfil</Typography>
           </MenuItem>
-          <MenuItem onClick={onSettingsClick} sx={styles.menuItem}>
+          <MenuItem onClick={handleSettingsClick} sx={styles.menuItem}>
             <ListItemIcon>
               <Settings fontSize="small" />
             </ListItemIcon>
@@ -173,7 +211,7 @@ const Header: React.FC<HeaderProps> = ({
           </MenuItem>
           <Divider sx={styles.divider} />
           <MenuItem 
-            onClick={onLogout} 
+            onClick={handleLogout} 
             sx={{ ...styles.menuItem, ...styles.menuItemDanger }}
           >
             <ListItemIcon>

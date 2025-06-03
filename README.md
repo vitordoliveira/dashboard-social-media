@@ -1,46 +1,101 @@
-# Getting Started with Create React App
+# 📊 Social Media Dashboard
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern, responsive dashboard for social media analytics built with React, TypeScript, and Material-UI.
 
-## Available Scripts
+![Dashboard Preview](https://via.placeholder.com/800x400?text=Dashboard+Preview)
 
-In the project directory, you can run:
+![React](https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-4.x-3178C6?style=for-the-badge&logo=typescript)
+![Material-UI](https://img.shields.io/badge/Material--UI-5.x-0081CB?style=for-the-badge&logo=mui)
+![Nivo](https://img.shields.io/badge/Nivo-Charts-FE376C?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjZmZmIiBoZWlnaHQ9IjI0IiB3aWR0aD0iMjQiIHZpZXdCb3g9IjAgMCAzNTAwIDI2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+)  
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-5.x-DB7093?style=for-the-badge&logo=framer) 
+![Node.js](https://img.shields.io/badge/Node.js-14%2B-339933?style=for-the-badge&logo=node.js)
 
-### `npm start`
+## ✨ Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **📱 Responsive Design**: Fully responsive layout that works on all devices  
+- **🌙 Dark/Light Mode**: Toggle between dark and light themes for comfortable viewing  
+- **📈 Interactive Charts**: Visualize social media performance with beautiful interactive charts  
+- **🔄 Real-time Updates**: Stay updated with the latest metrics and engagement data  
+- **⚡️ Fast Performance**: Optimized for speed and efficiency  
+- **🛡️ Type-Safe**: Built with TypeScript for enhanced reliability  
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## 🚀 Tech Stack
 
-### `npm test`
+| Technology      | Version | Description                    |
+|-----------------|---------|--------------------------------|
+| React           | 18.x    | Frontend library for UIs       |
+| TypeScript      | 4.x     | Static type-checking for JS    |
+| Material-UI     | 5.x     | React UI framework             |
+| Nivo            | Latest  | Data visualization library     |
+| Framer Motion   | 7.x     | Animation and transitions      |
+| Context API     | N/A     | State management in React      |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 📋 Prerequisites
 
-### `npm run build`
+- Node.js (v14 or higher)
+- npm or yarn
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 💻 Installation
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### 1. Clone the Repository
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+git clone https://github.com/vitordoliveira/dashboard-social-media.git
+cd dashboard-social-media
+```
 
-### `npm run eject`
+### 2. Install Dependencies
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```bash
+npm install
+# or
+yarn install
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### 3. Start the Development Server
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```bash
+npm start
+# or
+yarn start
+```
+Then open your browser and navigate to http://localhost:3000
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## 📱 Usage
 
-## Learn More
+The dashboard provides insights into your social media performance across different platforms:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- Overview: See key metrics at a glance  
+- Engagement: Track likes, comments, and shares  
+- Growth: Monitor follower growth over time  
+- Analytics: Deep dive into performance analytics  
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🛠️ Configuration
+
+You can customize the dashboard by modifying the theme settings in:
+```text
+src/theme/index.ts
+```
+or by adjusting the data sources in the API services (under:
+```text
+src/api
+```).
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+
+## 👤 Author
+
+Vitor Oliveira - [GitHub](https://github.com/vitordoliveira)
+
+## 🙏 Acknowledgments
+
+- **Material-UI** for the component library  
+- **Nivo** for the beautiful charts  
+- All contributors who helped improve this dashboard  

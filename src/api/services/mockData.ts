@@ -160,28 +160,44 @@ export const generateTopPosts = (startDate: Date, endDate: Date): Post[] => {
       network: 'instagram',
       content: '🚀 Nova coleção Outono/Inverno chegando! #ModaConsciente #Sustentabilidade',
       engagement: randomInRange(2000, 3000),
-      timestamp: '2h atrás'
+      timestamp: new Date().toISOString(),
+      likes: randomInRange(1500, 2000),
+      comments: randomInRange(100, 300),
+      shares: randomInRange(400, 700),
+      url: 'https://instagram.com/post/1'
     },
     {
       id: '2',
       network: 'facebook',
       content: '📢 Super promoção de fim de semana! Desconto de 30% em todas as peças.',
       engagement: randomInRange(1500, 2500),
-      timestamp: '5h atrás'
+      timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+      likes: randomInRange(800, 1200),
+      comments: randomInRange(200, 400),
+      shares: randomInRange(500, 900),
+      url: 'https://facebook.com/post/2'
     },
     {
       id: '3',
       network: 'twitter',
       content: '🎉 Em breve: Colaboração especial com @designerfamoso! Fiquem ligados!',
       engagement: randomInRange(800, 1200),
-      timestamp: '1d atrás'
+      timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      likes: randomInRange(400, 600),
+      comments: randomInRange(100, 200),
+      shares: randomInRange(300, 500),
+      url: 'https://twitter.com/post/3'
     },
     {
       id: '4',
       network: 'linkedin',
       content: 'Orgulhosos em anunciar nossa nova iniciativa de sustentabilidade...',
       engagement: randomInRange(500, 1000),
-      timestamp: '2d atrás'
+      timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      likes: randomInRange(200, 400),
+      comments: randomInRange(50, 150),
+      shares: randomInRange(250, 450),
+      url: 'https://linkedin.com/post/4'
     }
   ];
 };

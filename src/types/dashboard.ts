@@ -25,6 +25,10 @@ export interface Post {
   content: string;
   engagement: number;
   timestamp: string;
+  likes?: number;
+  comments?: number;
+  shares?: number;
+  url?: string;
 }
 
 export interface InsightData {

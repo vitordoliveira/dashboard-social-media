@@ -251,7 +251,7 @@ const Dashboard: React.FC<DashboardProps> = ({
           )}
         </MotionBox>
 
-        {/* Layout dos gráficos e posts */}
+        {/* Layout dos gráficos e posts - CORRIGIDO PARA ALINHAMENTO */}
         <MotionBox
           key="charts-container"
           variants={containerVariants}
@@ -264,23 +264,27 @@ const Dashboard: React.FC<DashboardProps> = ({
               lg: '2fr 1fr',
             },
             gap: 3,
+            alignItems: 'start', // Alinha os itens pelo topo
           }}
         >
           {/* Coluna dos gráficos */}
           <MotionBox 
             key="charts-column"
             variants={itemVariants}
-            sx={{ display: 'grid', gap: 3 }}
+            sx={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: 3,
+            }}
           >
             {isLoading ? (
-              <Box>
+              <>
                 <Skeleton 
                   variant="rectangular" 
                   height={400} 
                   sx={{ 
                     borderRadius: 2,
                     background: alpha(theme.palette.primary.main, 0.1),
-                    mb: 3
                   }} 
                 />
                 <Skeleton 
@@ -291,45 +295,58 @@ const Dashboard: React.FC<DashboardProps> = ({
                     background: alpha(theme.palette.primary.main, 0.1)
                   }} 
                 />
-              </Box>
+              </>
             ) : (
-              <Box>
+              <>
                 <LineChart 
                   data={lineChartData}
                   title="Crescimento de Seguidores"
                 />
-                <Box sx={{ mt: 3 }}>
-                  {/* Use os dados formatados */}
-                  <NetworkEngagementChart 
-                    data={formattedEngagementData}
-                    title="Engajamento por Rede Social"
-                    showLegend={true}
-                    height={400}
-                    onDownload={handleExportData}
-                    onToggleFullscreen={handleFullscreen}
-                    isLoading={isLoading}
-                  />
-                </Box>
-              </Box>
+                <NetworkEngagementChart 
+                  data={formattedEngagementData}
+                  title="Engajamento por Rede Social"
+                  showLegend={true}
+                  height={400}
+                  onDownload={handleExportData}
+                  onToggleFullscreen={handleFullscreen}
+                  isLoading={isLoading}
+                />
+              </>
             )}
           </MotionBox>
 
-          {/* Coluna lateral */}
+          {/* Coluna lateral para posts */}
           <MotionBox 
             key="posts-column"
             variants={itemVariants}
+            sx={{ 
+              height: '100%',
+            }}
           >
             {isLoading ? (
               <Skeleton 
                 variant="rectangular" 
-                height={820} 
+                height={825} // Ajusta para a mesma altura dos dois gráficos (400 + 400 + gap de 25)
                 sx={{ 
                   borderRadius: 2,
                   background: alpha(theme.palette.primary.main, 0.1)
                 }} 
               />
             ) : (
-              <TopPosts posts={topPosts} />
+              <Box
+                sx={{
+                  height: '100%', // Ocupa toda a altura disponível
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <TopPosts 
+                  posts={topPosts} 
+                  maxPosts={4} // Mostra apenas 4 posts para caber na altura dos dois gráficos
+                  isLoading={isLoading}
+                  onViewAll={() => console.log('Ver todos os posts')}
+                />
+              </Box>
             )}
           </MotionBox>
         </MotionBox>

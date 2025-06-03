@@ -145,7 +145,7 @@ const TopPosts: React.FC<TopPostsProps> = ({
       <Paper 
         elevation={isDarkMode ? 0 : 1}
         sx={{ 
-          height: '100%',
+          height: 825, // Altura fixa para corresponder aos dois gráficos
           bgcolor: theme.palette.background.paper,
           borderRadius: 2,
           border: isDarkMode ? `1px solid ${alpha(theme.palette.divider, 0.1)}` : 'none',
@@ -187,12 +187,14 @@ const TopPosts: React.FC<TopPostsProps> = ({
     <Paper 
       elevation={isDarkMode ? 0 : 1}
       sx={{ 
-        height: '100%',
+        height: 825, // Altura fixa para corresponder aos dois gráficos
+        display: 'flex',
+        flexDirection: 'column',
         bgcolor: theme.palette.background.paper,
         borderRadius: 2,
         border: isDarkMode ? `1px solid ${alpha(theme.palette.divider, 0.1)}` : 'none',
         position: 'relative',
-        overflow: 'hidden',
+        overflow: 'hidden', // Impede overflow
         transition: 'all 0.3s ease',
         '&:hover': {
           boxShadow: isDarkMode ? `0 4px 20px ${alpha('#000', 0.1)}` : theme.shadows[3],
@@ -211,298 +213,324 @@ const TopPosts: React.FC<TopPostsProps> = ({
         }
       }}
     >
-      <Box sx={{ p: 3 }}>
-        <Box 
+      {/* Cabeçalho - altura fixa */}
+      <Box 
+        sx={{ 
+          p: 3,
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          mb: 1
+        }}
+      >
+        <Typography 
+          variant="h6" 
           sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between',
-            mb: 2.5
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            color: theme.palette.text.primary
           }}
         >
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              color: theme.palette.text.primary
-            }}
-          >
-            <ShowChart sx={{ 
-              color: theme.palette.primary.main,
-              fontSize: '1.25rem'
-            }} />
-            {title}
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Tooltip title="Filtrar posts" arrow placement="top">
-              <IconButton 
-                size="small"
-                sx={{ 
-                  color: theme.palette.text.secondary,
-                  '&:hover': {
-                    color: theme.palette.primary.main,
-                    bgcolor: alpha(theme.palette.primary.main, 0.08)
-                  }
-                }}
-              >
-                <FilterList fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            
-            <Tooltip title="Ver todos os posts" arrow placement="top">
-              <IconButton 
-                size="small" 
-                onClick={onViewAll}
-                sx={{ 
-                  color: theme.palette.text.secondary,
-                  '&:hover': {
-                    color: theme.palette.primary.main,
-                    bgcolor: alpha(theme.palette.primary.main, 0.08)
-                  }
-                }}
-              >
-                <OpenInNew fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Box>
+          <ShowChart sx={{ 
+            color: theme.palette.primary.main,
+            fontSize: '1.25rem'
+          }} />
+          {title}
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Tooltip title="Filtrar posts" arrow placement="top">
+            <IconButton 
+              size="small"
+              sx={{ 
+                color: theme.palette.text.secondary,
+                '&:hover': {
+                  color: theme.palette.primary.main,
+                  bgcolor: alpha(theme.palette.primary.main, 0.08)
+                }
+              }}
+            >
+              <FilterList fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          
+          <Tooltip title="Ver todos os posts" arrow placement="top">
+            <IconButton 
+              size="small" 
+              onClick={onViewAll}
+              sx={{ 
+                color: theme.palette.text.secondary,
+                '&:hover': {
+                  color: theme.palette.primary.main,
+                  bgcolor: alpha(theme.palette.primary.main, 0.08)
+                }
+              }}
+            >
+              <OpenInNew fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Box>
+      </Box>
 
-        <List sx={{ p: 0, mt: 2 }}>
-          {visiblePosts.map((post, index) => {
-            const NetworkIcon = networkConfigs[post.network].icon;
-            const networkColor = networkConfigs[post.network].color;
+      {/* Conteúdo principal que pode precisar de scrolling */}
+      <Box 
+        sx={{ 
+          px: 3, 
+          pb: 3,
+          flexGrow: 1, 
+          overflow: 'auto',
+          maxHeight: 'calc(825px - 80px)', // Altura total menos o cabeçalho e margens
+          '&::-webkit-scrollbar': {
+            width: '8px',
+            backgroundColor: 'transparent',
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: 'transparent',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: alpha(theme.palette.primary.main, 0.2),
+            borderRadius: '4px',
+          },
+          '&:hover::-webkit-scrollbar-thumb': {
+            backgroundColor: alpha(theme.palette.primary.main, 0.3),
+          },
+          scrollbarWidth: 'thin',
+          scrollbarColor: `${alpha(theme.palette.primary.main, 0.2)} transparent`
+        }} 
+      >
+        {visiblePosts.map((post, index) => {
+          const NetworkIcon = networkConfigs[post.network].icon;
+          const networkColor = networkConfigs[post.network].color;
 
-            return (
-              <React.Fragment key={post.id}>
-                <ListItem 
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    transition: 'all 0.25s ease',
-                    '&:hover': {
-                      backgroundColor: isDarkMode 
-                        ? alpha(theme.palette.action.hover, 0.1) 
-                        : alpha(theme.palette.action.hover, 0.05),
-                      transform: 'translateX(4px)'
-                    },
-                  }}
-                >
-                  <Box sx={{ width: '100%' }}>
-                    {/* Header do Post */}
-                    <Box 
-                      sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        mb: 1.5,
-                        gap: 1,
-                        flexWrap: isMobile ? 'wrap' : 'nowrap'
-                      }}
-                    >
-                      <ListItemAvatar sx={{ minWidth: 'auto', mr: 1 }}>
-                        <Avatar 
-                          sx={{ 
-                            bgcolor: alpha(networkColor, isDarkMode ? 0.15 : 0.1),
-                            color: networkColor,
-                            width: 40,
-                            height: 40,
-                            boxShadow: `0 4px 8px ${alpha(networkColor, 0.2)}`
-                          }}
-                        >
-                          <NetworkIcon />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <Typography 
-                        variant="subtitle2" 
+          return (
+            <React.Fragment key={post.id}>
+              <ListItem 
+                disableGutters
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  transition: 'all 0.25s ease',
+                  '&:hover': {
+                    backgroundColor: isDarkMode 
+                      ? alpha(theme.palette.action.hover, 0.1) 
+                      : alpha(theme.palette.action.hover, 0.05),
+                    transform: 'translateX(4px)'
+                  },
+                }}
+              >
+                <Box sx={{ width: '100%' }}>
+                  {/* Header do Post */}
+                  <Box 
+                    sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      mb: 1.5,
+                      gap: 1,
+                      flexWrap: isMobile ? 'wrap' : 'nowrap'
+                    }}
+                  >
+                    <ListItemAvatar sx={{ minWidth: 'auto', mr: 1 }}>
+                      <Avatar 
                         sx={{ 
-                          color: networkColor,
-                          fontWeight: 600,
-                          fontSize: '0.9rem'
-                        }}
-                      >
-                        {networkConfigs[post.network].label}
-                      </Typography>
-                      <Box 
-                        sx={{ 
-                          ml: 'auto',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1,
-                          flexBasis: isMobile ? '100%' : 'auto',
-                          mt: isMobile ? 1 : 0,
-                          justifyContent: isMobile ? 'flex-end' : 'flex-start',
-                          order: isMobile ? 3 : 0
-                        }}
-                      >
-                        <Chip 
-                          label={`#${index + 1}`}
-                          size="small"
-                          sx={{ 
-                            bgcolor: alpha(theme.palette.primary.main, isDarkMode ? 0.15 : 0.08),
-                            color: theme.palette.primary.main,
-                            fontWeight: 600,
-                            fontSize: '0.75rem',
-                            height: 24,
-                            borderRadius: '12px'
-                          }}
-                        />
-                        <Typography 
-                          variant="caption" 
-                          sx={{ 
-                            color: alpha(theme.palette.text.secondary, 0.7),
-                            fontSize: '0.75rem',
-                            fontWeight: 500
-                          }}
-                        >
-                          {getTimeAgo(post.timestamp)}
-                        </Typography>
-                      </Box>
-                    </Box>
-
-                    {/* Conteúdo do Post */}
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        mb: 2,
-                        color: theme.palette.text.primary,
-                        lineHeight: 1.6,
-                        fontSize: '0.875rem',
-                        overflow: 'hidden',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                        textOverflow: 'ellipsis'
-                      }}
-                    >
-                      {post.content}
-                    </Typography>
-
-                    {/* Footer do Post */}
-                    <Box 
-                      sx={{ 
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: { xs: 1, md: 2 },
-                        flexWrap: isMobile ? 'wrap' : 'nowrap'
-                      }}
-                    >
-                      <Tooltip title="Curtidas" arrow placement="top">
-                        <Box 
-                          sx={{ 
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 0.5,
-                            color: theme.palette.text.secondary,
-                            '&:hover': {
-                              color: theme.palette.error.main,
-                            },
-                            transition: 'color 0.2s ease',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          <Favorite 
-                            sx={{ 
-                              fontSize: '0.9rem', 
-                              color: alpha(theme.palette.error.main, 0.7)
-                            }} 
-                          />
-                          <Typography variant="caption" sx={{ fontWeight: 500 }}>
-                            {formatNumber(post.likes || 0)}
-                          </Typography>
-                        </Box>
-                      </Tooltip>
-
-                      <Tooltip title="Comentários" arrow placement="top">
-                        <Box 
-                          sx={{ 
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 0.5,
-                            color: theme.palette.text.secondary,
-                            '&:hover': {
-                              color: theme.palette.info.main,
-                            },
-                            transition: 'color 0.2s ease',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          <Comment sx={{ fontSize: '0.9rem' }} />
-                          <Typography variant="caption" sx={{ fontWeight: 500 }}>
-                            {formatNumber(post.comments || 0)}
-                          </Typography>
-                        </Box>
-                      </Tooltip>
-
-                      <Tooltip title="Compartilhamentos" arrow placement="top">
-                        <Box 
-                          sx={{ 
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 0.5,
-                            color: theme.palette.text.secondary,
-                            '&:hover': {
-                              color: theme.palette.success.main,
-                            },
-                            transition: 'color 0.2s ease',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          <Share sx={{ fontSize: '0.9rem' }} />
-                          <Typography variant="caption" sx={{ fontWeight: 500 }}>
-                            {formatNumber(post.shares || 0)}
-                          </Typography>
-                        </Box>
-                      </Tooltip>
-
-                      <Chip 
-                        label={`${formatNumber(post.engagement)} engajamentos`}
-                        size="small"
-                        sx={{ 
-                          ml: 'auto',
                           bgcolor: alpha(networkColor, isDarkMode ? 0.15 : 0.1),
                           color: networkColor,
+                          width: 40,
+                          height: 40,
+                          boxShadow: `0 4px 8px ${alpha(networkColor, 0.2)}`
+                        }}
+                      >
+                        <NetworkIcon />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <Typography 
+                      variant="subtitle2" 
+                      sx={{ 
+                        color: networkColor,
+                        fontWeight: 600,
+                        fontSize: '0.9rem'
+                      }}
+                    >
+                      {networkConfigs[post.network].label}
+                    </Typography>
+                    <Box 
+                      sx={{ 
+                        ml: 'auto',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                        flexBasis: isMobile ? '100%' : 'auto',
+                        mt: isMobile ? 1 : 0,
+                        justifyContent: isMobile ? 'flex-end' : 'flex-start',
+                        order: isMobile ? 3 : 0
+                      }}
+                    >
+                      <Chip 
+                        label={`#${index + 1}`}
+                        size="small"
+                        sx={{ 
+                          bgcolor: alpha(theme.palette.primary.main, isDarkMode ? 0.15 : 0.08),
+                          color: theme.palette.primary.main,
+                          fontWeight: 600,
+                          fontSize: '0.75rem',
                           height: 24,
-                          '& .MuiChip-label': {
-                            fontWeight: 600,
-                            fontSize: '0.7rem',
-                            px: 1
-                          },
                           borderRadius: '12px'
                         }}
                       />
-
-                      <Tooltip title="Mais ações" arrow placement="top">
-                        <IconButton 
-                          size="small"
-                          onClick={(e) => handleOpenMenu(e, post.id)}
-                          sx={{ 
-                            color: theme.palette.text.secondary,
-                            '&:hover': {
-                              color: theme.palette.primary.main,
-                              bgcolor: alpha(theme.palette.primary.main, 0.08)
-                            }
-                          }}
-                        >
-                          <MoreVert sx={{ fontSize: '1rem' }} />
-                        </IconButton>
-                      </Tooltip>
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          color: alpha(theme.palette.text.secondary, 0.7),
+                          fontSize: '0.75rem',
+                          fontWeight: 500
+                        }}
+                      >
+                        {getTimeAgo(post.timestamp)}
+                      </Typography>
                     </Box>
                   </Box>
-                </ListItem>
-                {index < visiblePosts.length - 1 && (
-                  <Divider 
+
+                  {/* Conteúdo do Post */}
+                  <Typography 
+                    variant="body2" 
                     sx={{ 
-                      my: 1,
-                      borderColor: alpha(theme.palette.divider, isDarkMode ? 0.1 : 0.08)
-                    }} 
-                  />
-                )}
-              </React.Fragment>
-            );
-          })}
-        </List>
+                      mb: 2,
+                      color: theme.palette.text.primary,
+                      lineHeight: 1.6,
+                      fontSize: '0.875rem',
+                      overflow: 'hidden',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      textOverflow: 'ellipsis'
+                    }}
+                  >
+                    {post.content}
+                  </Typography>
+
+                  {/* Footer do Post */}
+                  <Box 
+                    sx={{ 
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: { xs: 1, md: 2 },
+                      flexWrap: isMobile ? 'wrap' : 'nowrap'
+                    }}
+                  >
+                    <Tooltip title="Curtidas" arrow placement="top">
+                      <Box 
+                        sx={{ 
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          color: theme.palette.text.secondary,
+                          '&:hover': {
+                            color: theme.palette.error.main,
+                          },
+                          transition: 'color 0.2s ease',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Favorite 
+                          sx={{ 
+                            fontSize: '0.9rem', 
+                            color: alpha(theme.palette.error.main, 0.7)
+                          }} 
+                        />
+                        <Typography variant="caption" sx={{ fontWeight: 500 }}>
+                          {formatNumber(post.likes || 0)}
+                        </Typography>
+                      </Box>
+                    </Tooltip>
+
+                    <Tooltip title="Comentários" arrow placement="top">
+                      <Box 
+                        sx={{ 
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          color: theme.palette.text.secondary,
+                          '&:hover': {
+                            color: theme.palette.info.main,
+                          },
+                          transition: 'color 0.2s ease',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Comment sx={{ fontSize: '0.9rem' }} />
+                        <Typography variant="caption" sx={{ fontWeight: 500 }}>
+                          {formatNumber(post.comments || 0)}
+                        </Typography>
+                      </Box>
+                    </Tooltip>
+
+                    <Tooltip title="Compartilhamentos" arrow placement="top">
+                      <Box 
+                        sx={{ 
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 0.5,
+                          color: theme.palette.text.secondary,
+                          '&:hover': {
+                            color: theme.palette.success.main,
+                          },
+                          transition: 'color 0.2s ease',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <Share sx={{ fontSize: '0.9rem' }} />
+                        <Typography variant="caption" sx={{ fontWeight: 500 }}>
+                          {formatNumber(post.shares || 0)}
+                        </Typography>
+                      </Box>
+                    </Tooltip>
+
+                    <Chip 
+                      label={`${formatNumber(post.engagement)} engajamentos`}
+                      size="small"
+                      sx={{ 
+                        ml: 'auto',
+                        bgcolor: alpha(networkColor, isDarkMode ? 0.15 : 0.1),
+                        color: networkColor,
+                        height: 24,
+                        '& .MuiChip-label': {
+                          fontWeight: 600,
+                          fontSize: '0.7rem',
+                          px: 1
+                        },
+                        borderRadius: '12px'
+                      }}
+                    />
+
+                    <Tooltip title="Mais ações" arrow placement="top">
+                      <IconButton 
+                        size="small"
+                        onClick={(e) => handleOpenMenu(e, post.id)}
+                        sx={{ 
+                          color: theme.palette.text.secondary,
+                          '&:hover': {
+                            color: theme.palette.primary.main,
+                            bgcolor: alpha(theme.palette.primary.main, 0.08)
+                          }
+                        }}
+                      >
+                        <MoreVert sx={{ fontSize: '1rem' }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </Box>
+              </ListItem>
+              {index < visiblePosts.length - 1 && (
+                <Divider 
+                  sx={{ 
+                    my: 1,
+                    borderColor: alpha(theme.palette.divider, isDarkMode ? 0.1 : 0.08)
+                  }} 
+                />
+              )}
+            </React.Fragment>
+          );
+        })}
 
         {posts.length > maxPosts && (
           <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
@@ -521,38 +549,38 @@ const TopPosts: React.FC<TopPostsProps> = ({
             </Button>
           </Box>
         )}
-
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleCloseMenu}
-          PaperProps={{
-            elevation: isDarkMode ? 3 : 6,
-            sx: {
-              width: 200,
-              borderRadius: 2,
-              border: isDarkMode ? `1px solid ${alpha(theme.palette.divider, 0.1)}` : 'none',
-              mt: 1,
-              '& .MuiMenuItem-root': {
-                fontSize: '0.875rem',
-                py: 1
-              }
-            }
-          }}
-          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-        >
-          <MenuItem onClick={() => handleMenuAction('view')}>
-            <OpenInNew sx={{ mr: 1.5, fontSize: 18 }} /> Ver no original
-          </MenuItem>
-          <MenuItem onClick={() => handleMenuAction('copy-link')}>
-            <LinkIcon sx={{ mr: 1.5, fontSize: 18 }} /> Copiar link
-          </MenuItem>
-          <MenuItem onClick={() => handleMenuAction('copy-content')}>
-            <ContentCopy sx={{ mr: 1.5, fontSize: 18 }} /> Copiar texto
-          </MenuItem>
-        </Menu>
       </Box>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleCloseMenu}
+        PaperProps={{
+          elevation: isDarkMode ? 3 : 6,
+          sx: {
+            width: 200,
+            borderRadius: 2,
+            border: isDarkMode ? `1px solid ${alpha(theme.palette.divider, 0.1)}` : 'none',
+            mt: 1,
+            '& .MuiMenuItem-root': {
+              fontSize: '0.875rem',
+              py: 1
+            }
+          }
+        }}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+      >
+        <MenuItem onClick={() => handleMenuAction('view')}>
+          <OpenInNew sx={{ mr: 1.5, fontSize: 18 }} /> Ver no original
+        </MenuItem>
+        <MenuItem onClick={() => handleMenuAction('copy-link')}>
+          <LinkIcon sx={{ mr: 1.5, fontSize: 18 }} /> Copiar link
+        </MenuItem>
+        <MenuItem onClick={() => handleMenuAction('copy-content')}>
+          <ContentCopy sx={{ mr: 1.5, fontSize: 18 }} /> Copiar texto
+        </MenuItem>
+      </Menu>
     </Paper>
   );
 };

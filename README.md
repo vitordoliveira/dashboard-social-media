@@ -5,8 +5,8 @@ A modern, responsive dashboard for social media analytics built with React, Type
 ![React](https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-4.x-3178C6?style=for-the-badge&logo=typescript)
 ![Material-UI](https://img.shields.io/badge/Material--UI-5.x-0081CB?style=for-the-badge&logo=mui)
-![Nivo](https://img.shields.io/badge/Nivo-Charts-FE376C?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjZmZmIiBoZWlnaHQ9IjI0IiB3aWR0aD0iMjQiIHZpZXdCb3g9IjAgMCAzNTAwIDI2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+)  
-![Framer Motion](https://img.shields.io/badge/Framer_Motion-5.x-DB7093?style=for-the-badge&logo=framer) 
+![Nivo](https://img.shields.io/badge/Nivo-Charts-FE376C?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjZmZmIiBoZWlnaHQ9IjI0IiB3aWR0aD0iMjQiIHZpZXdCb3g9IjAgMCAzNTAwIDI2MDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PC9zdmc+)
+![Framer Motion](https://img.shields.io/badge/Framer_Motion-7.x-DB7093?style=for-the-badge&logo=framer)
 ![Node.js](https://img.shields.io/badge/Node.js-14%2B-339933?style=for-the-badge&logo=node.js)
 
 ## ✨ Features
@@ -75,14 +75,14 @@ You can customize the dashboard by modifying the theme settings in:
 ```text
 src/theme/index.ts
 ```
-or by adjusting the data sources in the API services (under:
+or by adjusting the data sources in the API services located in:
 ```text
 src/api
-```).
+```
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a pull request.
 
 ## 📄 License
 
@@ -96,4 +96,4 @@ Vitor Oliveira - [GitHub](https://github.com/vitordoliveira)
 
 - **Material-UI** for the component library  
 - **Nivo** for the beautiful charts  
-- All contributors who helped improve this dashboard  
+- All contributors who helped improve this dashboard
